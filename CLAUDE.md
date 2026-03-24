@@ -218,12 +218,15 @@ window.docsRenameFolder = (id) => docs.renameFolder(id);
 window.docsDeleteFolder = (id) => docs.deleteFolder(id);
 window.docsDeleteFile = (id) => docs.deleteDoc(id);
 
-// CHAT (a implementar — Prompt 9)
-// window.sendMsg = () => chat.sendMsg();
-// window.clearChat = () => chat.clearChat();
-// window.toggleMic = () => chat.toggleMic();
-// window.selectAgente = (slug) => chat.selectAgente(slug);
-// window.saveMemoria = (agenteSlug, texto) => chat.saveMemoria(agenteSlug, texto);
+// CHAT
+window.sendMsg = () => chat.sendMsg();
+window.clearChat = () => chat.clearChat();
+window.toggleMic = () => chat.toggleMic();
+window.selectAgente = (slug) => chat.selectAgente(slug);
+window.saveMemoria = (slug, texto) => chat.saveMemoria(slug, texto);
+window.showAgentGrid = () => chat.showAgentGrid();
+window.dismissMemoria = () => chat.dismissMemoria();
+window.chatKeyDown = (e) => chat.keyDown(e);
 
 // SÍTIO
 window.sitioTab = (t) => sitio.tab(t);
