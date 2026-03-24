@@ -17,7 +17,7 @@ import * as docs from './modules/docs.js';
 // import * as chat from './modules/chat.js';
 import * as sitio from './modules/sitio.js';
 import * as cedtec from './modules/cedtec.js';
-// import * as config from './modules/config.js';
+import * as config from './modules/config.js';
 
 // ── FLAG DE INICIALIZAÇÃO ──
 let appInitialized = false;
@@ -176,6 +176,7 @@ window.goPage = (page) => {
   if (page === 'docs') docs.loadDocs();
   if (page === 'sitio') sitio.loadSitio();
   if (page === 'cedtec') cedtec.loadCedtec();
+  if (page === 'config') config.loadConfig();
 };
 window.toggleSidebar = toggleSidebar;
 
@@ -252,11 +253,16 @@ window.cedtecOpenRecarga = () => cedtec.openRecarga();
 window.cedtecSaveRecarga = () => cedtec.saveRecarga();
 window.cedtecDeleteRecarga = (id) => cedtec.deleteRecarga(id);
 
-// CONFIGURAÇÕES (quando implementado)
-// window.configTab = (tab) => config.tab(tab);
-// window.openNewAgente = () => config.openNewAgente();
-// window.openEditAgente = (id) => config.openEditAgente(id);
-// window.toggleAgente = (id, ativo) => config.toggleAgente(id, ativo);
-// window.uploadAgentePhoto = (id) => config.uploadAgentePhoto(id);
-// window.uploadAgenteFile = (id) => config.uploadAgenteFile(id);
-// window.deleteMemoriaAgente = (id, idx) => config.deleteMemoria(id, idx);
+// CONFIGURAÇÕES
+window.configTab = (t) => config.tab(t);
+window.openNewAgente = () => config.openNewAgente();
+window.openEditAgente = (id) => config.openEditAgente(id);
+window.toggleAgente = (id, ativo) => config.toggleAgente(id, ativo);
+window.uploadAgentePhoto = (id) => config.uploadAgentePhoto(id);
+window.uploadAgenteFile = (id) => config.uploadAgenteFile(id);
+window.deleteMemoriaAgente = (id, idx) => config.deleteMemoria(id, idx);
+window.configSaveAgente = (id) => config.saveAgente(id);
+window.configAgTab = (t) => config.agTab(t);
+window.configAutoSlug = () => config.autoSlug();
+window.configTestMeta = () => config.testMeta();
+window.configSaveMeta = () => config.saveMeta();

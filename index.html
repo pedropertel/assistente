@@ -1170,9 +1170,70 @@ tr:hover td { background: var(--bg-hover); }
 
       <!-- CONFIGURACOES -->
       <div class="page" id="page-config">
-        <div class="empty-state">
-          <div class="empty-state-icon">&#x2699;&#xFE0F;</div>
-          <p class="empty-state-text">Configuracoes — em breve</p>
+        <!-- Sub-abas -->
+        <div class="tabs" style="margin-bottom:16px;">
+          <button class="tab active" onclick="configTab('agentes')">Agentes</button>
+          <button class="tab" onclick="configTab('integracoes')">Integracoes</button>
+          <button class="tab" onclick="configTab('aparencia')">Aparencia</button>
+          <button class="tab" onclick="configTab('sobre')">Sobre</button>
+        </div>
+
+        <!-- AGENTES -->
+        <div id="config-tab-agentes">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+            <button class="btn btn-primary btn-sm" onclick="openNewAgente()">+ Novo agente</button>
+          </div>
+          <div id="config-agentes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;"></div>
+          <div id="config-agentes-empty" class="empty-state" style="display:none;">
+            <div class="empty-state-icon">&#x1F916;</div>
+            <p class="empty-state-text">Nenhum agente</p>
+            <button class="btn btn-primary btn-sm" onclick="openNewAgente()">Criar primeiro</button>
+          </div>
+        </div>
+
+        <!-- INTEGRACOES -->
+        <div id="config-tab-integracoes" style="display:none;">
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <span class="card-title">Meta Ads</span>
+              <span class="badge" id="config-meta-status"></span>
+            </div>
+            <div class="form-group"><label class="form-label">Ad Account ID</label><input type="text" class="input" id="config-meta-account" placeholder="Ex: 1126004757885092"></div>
+            <div class="form-group"><label class="form-label">Access Token</label><input type="text" class="input" id="config-meta-token" placeholder="EAA..."></div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="configTestMeta()">Testar conexao</button>
+              <button class="btn btn-primary btn-sm" onclick="configSaveMeta()">Salvar</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Google Calendar</span><span class="badge badge-status-pendente">Fase 3</span></div>
+            <p style="color:var(--text-muted);font-size:13px;">Integracao prevista para a Fase 3.</p>
+          </div>
+        </div>
+
+        <!-- APARENCIA -->
+        <div id="config-tab-aparencia" style="display:none;">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px;">Tema</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <label class="toggle">
+                <input type="checkbox" id="config-theme-toggle" onchange="toggleTheme()">
+                <span class="toggle-track"></span>
+                <span class="toggle-thumb"></span>
+              </label>
+              <span style="font-size:14px;">Tema claro</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOBRE -->
+        <div id="config-tab-sobre" style="display:none;">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px;">Assistente</div>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Sistema de inteligencia pessoal do Pedro Pertel</p>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">Stack: HTML/JS + Supabase + Claude Haiku + Vercel</p>
+            <p style="font-size:13px;color:var(--text-muted);">Versao: 1.0.0 — Fase 2</p>
+          </div>
         </div>
       </div>
     </div>
