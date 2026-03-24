@@ -365,6 +365,13 @@ body {
 .kanban-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-sm); }
 .kanban-card.dragging { opacity: 0.5; }
 .kanban-col.drag-over { border: 2px dashed var(--accent); }
+.kanban-cards { display: flex; flex-direction: column; gap: 8px; min-height: 40px; flex: 1; }
+.kanban-card-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.kanban-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--text-muted); }
+.kanban-card-ent { font-size: 12px; }
+.kanban-card-actions { display: none; gap: 4px; margin-top: 8px; }
+.kanban-card:hover .kanban-card-actions { display: flex; }
+.kanban-card-move { display: none; gap: 4px; margin-top: 8px; }
 
 /* ── TABLE ── */
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -628,6 +635,10 @@ tr:hover td { background: var(--bg-hover); }
   }
   .toast-container { top: 8px; right: 8px; left: 8px; }
   .toast { min-width: auto; width: 100%; }
+  #tasks-mobile-tabs { display: flex !important; }
+  .kanban-card-move { display: flex !important; }
+  .kanban-card-actions { display: none !important; }
+  .kanban-card:hover .kanban-card-actions { display: none !important; }
 }
 
 /* ── LARGE DESKTOP ── */
@@ -818,9 +829,54 @@ tr:hover td { background: var(--bg-hover); }
 
       <!-- TAREFAS -->
       <div class="page" id="page-tasks">
-        <div class="empty-state">
+        <!-- Header do módulo -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span id="tasks-urgente-badge" class="badge badge-prio-urgente" style="display:none;"></span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewTask()">+ Nova tarefa</button>
+        </div>
+
+        <!-- Filtro por empresa -->
+        <div class="chips" id="tasks-filter"></div>
+
+        <!-- Mobile: pills de coluna -->
+        <div class="tabs" id="tasks-mobile-tabs" style="display:none;">
+          <button class="tab active" onclick="tasksShowCol('pendente')">Pendente</button>
+          <button class="tab" onclick="tasksShowCol('em_andamento')">Em andamento</button>
+          <button class="tab" onclick="tasksShowCol('concluida')">Concluida</button>
+        </div>
+
+        <!-- Kanban -->
+        <div class="kanban" id="tasks-kanban">
+          <div class="kanban-col" id="col-pendente" data-status="pendente">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Pendente</span>
+              <span class="kanban-col-count" id="count-pendente">0</span>
+            </div>
+            <div id="cards-pendente" class="kanban-cards"></div>
+          </div>
+          <div class="kanban-col" id="col-em_andamento" data-status="em_andamento">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Em andamento</span>
+              <span class="kanban-col-count" id="count-em_andamento">0</span>
+            </div>
+            <div id="cards-em_andamento" class="kanban-cards"></div>
+          </div>
+          <div class="kanban-col" id="col-concluida" data-status="concluida">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Concluida</span>
+              <span class="kanban-col-count" id="count-concluida">0</span>
+            </div>
+            <div id="cards-concluida" class="kanban-cards"></div>
+          </div>
+        </div>
+
+        <!-- Empty state geral -->
+        <div id="tasks-empty" class="empty-state" style="display:none;">
           <div class="empty-state-icon">&#x2705;</div>
-          <p class="empty-state-text">Tarefas — em breve</p>
+          <p class="empty-state-text">Nenhuma tarefa ainda</p>
+          <button class="btn btn-primary" onclick="openNewTask()">Criar primeira tarefa</button>
         </div>
       </div>
 

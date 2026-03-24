@@ -11,7 +11,7 @@ import * as utils from './core/utils.js';
 
 // Módulos (importar conforme implementados)
 import * as dashboard from './modules/dashboard.js';
-// import * as tasks from './modules/tasks.js';
+import * as tasks from './modules/tasks.js';
 // import * as agenda from './modules/agenda.js';
 // import * as docs from './modules/docs.js';
 // import * as chat from './modules/chat.js';
@@ -143,8 +143,7 @@ function setupKeyboard() {
 
     switch (e.key) {
       case 'N': case 'n':
-        // Atalho para nova tarefa (quando implementado)
-        // if (router.getCurrentPage() === 'tasks') tasks.openNewTask();
+        if (router.getCurrentPage() === 'tasks') tasks.openNewTask();
         break;
       case 'E': case 'e':
         // Atalho para novo evento (quando implementado)
@@ -169,7 +168,12 @@ window.signIn = signIn;
 window.signOut = signOut;
 
 // NAVEGAÇÃO
-window.goPage = (page) => router.goPage(page);
+window.goPage = (page) => {
+  router.goPage(page);
+  // Carregar módulo ao navegar
+  if (page === 'dashboard') dashboard.loadDashboard();
+  if (page === 'tasks') tasks.loadTasks();
+};
 window.toggleSidebar = toggleSidebar;
 
 // MODAL
@@ -181,11 +185,14 @@ window.showToast = (msg, type) => toast.show(msg, type);
 // TEMA
 window.toggleTheme = toggleTheme;
 
-// TAREFAS (quando implementado)
-// window.openNewTask = () => tasks.openNewTask();
-// window.openEditTask = (id) => tasks.openEditTask(id);
-// window.deleteTask = (id) => tasks.deleteTask(id);
-// window.moveTask = (id, status) => tasks.moveTask(id, status);
+// TAREFAS
+window.openNewTask = () => tasks.openNewTask();
+window.openEditTask = (id) => tasks.openEditTask(id);
+window.deleteTask = (id) => tasks.deleteTask(id);
+window.moveTask = (id, status) => tasks.moveTask(id, status);
+window.taskSave = (id) => tasks.saveTask(id);
+window.tasksFilter = (id) => tasks.filterTasks(id);
+window.tasksShowCol = (status) => tasks.showCol(status);
 
 // AGENDA (quando implementado)
 // window.openNewEvent = () => agenda.openNewEvent();
