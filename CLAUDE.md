@@ -170,8 +170,8 @@ supabase functions deploy chat-claude --project-ref msbwplsknncnxwsalumd
 window.signIn = signIn;
 window.signOut = signOut;
 
-// NAVEGAÇÃO
-window.goPage = (page) => router.goPage(page);
+// NAVEGAÇÃO (com lazy load de módulos)
+window.goPage = (page) => { router.goPage(page); /* carrega módulo */ };
 window.toggleSidebar = toggleSidebar;
 
 // MODAL
@@ -188,11 +188,19 @@ window.openNewTask = () => tasks.openNewTask();
 window.openEditTask = (id) => tasks.openEditTask(id);
 window.deleteTask = (id) => tasks.deleteTask(id);
 window.moveTask = (id, status) => tasks.moveTask(id, status);
+window.taskSave = (id) => tasks.saveTask(id);
+window.tasksFilter = (id) => tasks.filterTasks(id);
+window.tasksShowCol = (status) => tasks.showCol(status);
 
 // AGENDA
 window.openNewEvent = () => agenda.openNewEvent();
 window.openEditEvent = (id) => agenda.openEditEvent(id);
 window.deleteEvent = (id) => agenda.deleteEvent(id);
+window.eventSave = (id) => agenda.saveEvent(id);
+window.agendaPrevMonth = () => agenda.prevMonth();
+window.agendaNextMonth = () => agenda.nextMonth();
+window.agendaClickDay = (y, m, d) => agenda.clickDay(y, m, d);
+window.evToggleDiaInteiro = () => agenda.toggleDiaInteiro();
 
 // DOCUMENTOS
 window.openNewFolder = () => docs.openNewFolder();
@@ -202,35 +210,56 @@ window.downloadDoc = (id) => docs.downloadDoc(id);
 window.deleteDoc = (id) => docs.deleteDoc(id);
 window.openFileViewer = (url, tipo) => docs.openFileViewer(url, tipo);
 window.shareDoc = (id) => docs.shareDoc(id);
+window.docsSaveFolder = () => docs.saveFolder();
+window.docsHandleFiles = (files) => docs.handleFiles(files);
+window.docsContextFolder = (id, e) => docs.contextFolder(id, e);
+window.docsContextFile = (id, e) => docs.contextFile(id, e);
+window.docsRenameFolder = (id) => docs.renameFolder(id);
+window.docsDeleteFolder = (id) => docs.deleteFolder(id);
+window.docsDeleteFile = (id) => docs.deleteDoc(id);
 
-// CHAT
-window.sendMsg = () => chat.sendMsg();
-window.clearChat = () => chat.clearChat();
-window.toggleMic = () => chat.toggleMic();
-window.selectAgente = (slug) => chat.selectAgente(slug);
-window.saveMemoria = (agenteSlug, texto) => chat.saveMemoria(agenteSlug, texto);
+// CHAT (a implementar — Prompt 9)
+// window.sendMsg = () => chat.sendMsg();
+// window.clearChat = () => chat.clearChat();
+// window.toggleMic = () => chat.toggleMic();
+// window.selectAgente = (slug) => chat.selectAgente(slug);
+// window.saveMemoria = (agenteSlug, texto) => chat.saveMemoria(agenteSlug, texto);
 
 // SÍTIO
-window.sitioTab = (tab) => sitio.tab(tab);
+window.sitioTab = (t) => sitio.tab(t);
 window.openNewLanc = () => sitio.openNewLanc();
 window.openEditLanc = (id) => sitio.openEditLanc(id);
 window.deleteLanc = (id) => sitio.deleteLanc(id);
 window.openNewCentro = () => sitio.openNewCentro();
 window.openEditCentro = (id) => sitio.openEditCentro(id);
 window.deleteCentro = (id) => sitio.deleteCentro(id);
+window.sitioSaveLanc = (id) => sitio.saveLanc(id);
+window.sitioSaveCentro = (id) => sitio.saveCentro(id);
+window.sitioViewAttach = (url) => sitio.viewAttach(url);
+window.sitioFilterCentro = (v) => sitio.setFilterCentro(v);
+window.sitioFilterTipo = (v) => sitio.setFilterTipo(v);
+window.sitioToggleDatas = () => sitio.toggleDatas();
 
 // CEDTEC
-window.cedtecTab = (tab) => cedtec.tab(tab);
+window.cedtecTab = (t) => cedtec.tab(t);
 window.cedtecSyncMeta = () => cedtec.syncMeta();
+window.cedtecOpenRecarga = () => cedtec.openRecarga();
+window.cedtecSaveRecarga = () => cedtec.saveRecarga();
+window.cedtecDeleteRecarga = (id) => cedtec.deleteRecarga(id);
 
 // CONFIGURAÇÕES
-window.configTab = (tab) => config.tab(tab);
+window.configTab = (t) => config.tab(t);
 window.openNewAgente = () => config.openNewAgente();
 window.openEditAgente = (id) => config.openEditAgente(id);
 window.toggleAgente = (id, ativo) => config.toggleAgente(id, ativo);
 window.uploadAgentePhoto = (id) => config.uploadAgentePhoto(id);
 window.uploadAgenteFile = (id) => config.uploadAgenteFile(id);
 window.deleteMemoriaAgente = (id, idx) => config.deleteMemoria(id, idx);
+window.configSaveAgente = (id) => config.saveAgente(id);
+window.configAgTab = (t) => config.agTab(t);
+window.configAutoSlug = () => config.autoSlug();
+window.configTestMeta = () => config.testMeta();
+window.configSaveMeta = () => config.saveMeta();
 ```
 
 ---
