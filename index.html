@@ -1013,9 +1013,87 @@ tr:hover td { background: var(--bg-hover); }
 
       <!-- CEDTEC -->
       <div class="page" id="page-cedtec">
-        <div class="empty-state">
-          <div class="empty-state-icon">&#x1F393;</div>
-          <p class="empty-state-text">CEDTEC — em breve</p>
+        <!-- Banner de alerta Meta -->
+        <div id="cedtec-alert-banner"></div>
+
+        <!-- Sub-abas -->
+        <div class="tabs" style="margin-bottom:16px;">
+          <button class="tab active" onclick="cedtecTab('visao')">Visao Geral</button>
+          <button class="tab" onclick="cedtecTab('saldo')">Saldo Meta</button>
+          <button class="tab" onclick="cedtecTab('campanhas')">Campanhas</button>
+          <button class="tab" onclick="cedtecTab('funil')">Funil SGE</button>
+          <button class="tab" onclick="cedtecTab('marcos')">Marcos</button>
+        </div>
+
+        <!-- VISAO GERAL -->
+        <div id="cedtec-tab-visao">
+          <div class="stat-cards" id="cedtec-stats"></div>
+          <div id="cedtec-saldo-alert"></div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title" style="margin-bottom:12px;">Gasto vs Leads — 30 dias</div>
+            <canvas id="cedtec-chart-gastoLeads" height="200"></canvas>
+          </div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title" style="margin-bottom:12px;">Top campanhas</div>
+            <div id="cedtec-top-campanhas"></div>
+          </div>
+        </div>
+
+        <!-- SALDO META -->
+        <div id="cedtec-tab-saldo" style="display:none;">
+          <div class="card" style="margin-bottom:16px;">
+            <div id="cedtec-saldo-display"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Historico de recargas</span>
+              <button class="btn btn-primary btn-sm" onclick="cedtecOpenRecarga()">+ Recarga</button>
+            </div>
+            <div id="cedtec-recargas-list"></div>
+          </div>
+        </div>
+
+        <!-- CAMPANHAS -->
+        <div id="cedtec-tab-campanhas" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div id="cedtec-sync-info" style="font-size:12px;color:var(--text-muted);"></div>
+            <button class="btn btn-secondary btn-sm" onclick="cedtecSyncMeta()">&#x1F504; Sincronizar</button>
+          </div>
+          <div class="table-wrap">
+            <table id="cedtec-camp-table">
+              <thead><tr><th>Nome</th><th>Curso</th><th>Status</th><th>Gasto</th><th>Leads</th><th>CTR</th><th>CPL</th></tr></thead>
+              <tbody id="cedtec-camp-body"></tbody>
+            </table>
+          </div>
+          <div id="cedtec-camp-empty" class="empty-state" style="display:none;">
+            <div class="empty-state-icon">&#x1F4E1;</div>
+            <p class="empty-state-text">Nenhuma campanha sincronizada</p>
+            <button class="btn btn-primary btn-sm" onclick="cedtecSyncMeta()">Sincronizar agora</button>
+          </div>
+        </div>
+
+        <!-- FUNIL SGE -->
+        <div id="cedtec-tab-funil" style="display:none;">
+          <div class="empty-state">
+            <div class="empty-state-icon">&#x1F4CA;</div>
+            <p class="empty-state-text">Importe dados do SGE pelo chat com o Marcos</p>
+            <button class="btn btn-primary btn-sm" onclick="cedtecTab('marcos')">Falar com Marcos</button>
+          </div>
+        </div>
+
+        <!-- MARCOS (sub-chat) -->
+        <div id="cedtec-tab-marcos" style="display:none;">
+          <div class="card" style="padding:24px;text-align:center;">
+            <div style="font-size:32px;margin-bottom:12px;">&#x1F393;</div>
+            <p style="color:var(--text-secondary);margin-bottom:16px;">Chat com Marcos — Gestor de Trafego</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;">
+              <button class="chip" onclick="goPage('chat')">Como estao as campanhas?</button>
+              <button class="chip" onclick="goPage('chat')">Qual o CPL atual?</button>
+              <button class="chip" onclick="goPage('chat')">Previsao de gasto do mes</button>
+              <button class="chip" onclick="goPage('chat')">Tem algum numero ruim?</button>
+            </div>
+            <button class="btn btn-primary" onclick="goPage('chat')">Abrir chat com Marcos</button>
+          </div>
         </div>
       </div>
 

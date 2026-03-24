@@ -16,7 +16,7 @@ import * as agenda from './modules/agenda.js';
 import * as docs from './modules/docs.js';
 // import * as chat from './modules/chat.js';
 import * as sitio from './modules/sitio.js';
-// import * as cedtec from './modules/cedtec.js';
+import * as cedtec from './modules/cedtec.js';
 // import * as config from './modules/config.js';
 
 // ── FLAG DE INICIALIZAÇÃO ──
@@ -175,6 +175,7 @@ window.goPage = (page) => {
   if (page === 'agenda') agenda.loadAgenda();
   if (page === 'docs') docs.loadDocs();
   if (page === 'sitio') sitio.loadSitio();
+  if (page === 'cedtec') cedtec.loadCedtec();
 };
 window.toggleSidebar = toggleSidebar;
 
@@ -244,9 +245,12 @@ window.sitioFilterCentro = (v) => sitio.setFilterCentro(v);
 window.sitioFilterTipo = (v) => sitio.setFilterTipo(v);
 window.sitioToggleDatas = () => sitio.toggleDatas();
 
-// CEDTEC (quando implementado)
-// window.cedtecTab = (tab) => cedtec.tab(tab);
-// window.cedtecSyncMeta = () => cedtec.syncMeta();
+// CEDTEC
+window.cedtecTab = (t) => cedtec.tab(t);
+window.cedtecSyncMeta = () => cedtec.syncMeta();
+window.cedtecOpenRecarga = () => cedtec.openRecarga();
+window.cedtecSaveRecarga = () => cedtec.saveRecarga();
+window.cedtecDeleteRecarga = (id) => cedtec.deleteRecarga(id);
 
 // CONFIGURAÇÕES (quando implementado)
 // window.configTab = (tab) => config.tab(tab);
