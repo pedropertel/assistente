@@ -339,5 +339,7 @@ Histórico separado: `chat_mensagens WHERE agente_slug = '{slug}'`
 
 > ✅ Repositório criado: github.com/pedropertel/assistente
 > ✅ Vercel configurado: assistente-two.vercel.app
-> ✅ Código: Prompt 0 — Fundação concluído (2026-03-24)
-> ✅ Banco: Prompt 1 — Banco criado do zero (2026-03-24)
+> ✅ Código: Fase 1 (Fundação) + Fase 2 (Módulos Core) concluídas (2026-03-24)
+> ✅ Banco: 16 tabelas criadas, RLS, dados iniciais (2026-03-24)
+> ✅ Módulos: Dashboard, Tarefas, Agenda, Documentos, Chat IA, Sítio, CEDTEC, Configurações
+> 🔴 Edge Function chat-claude: deploy pendente (supabase functions deploy)
