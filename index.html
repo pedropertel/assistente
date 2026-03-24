@@ -647,6 +647,31 @@ tr:hover td { background: var(--bg-hover); }
   #page-dashboard .card { min-height: 0; }
 }
 
+/* ── DOCUMENTOS ── */
+.doc-item {
+  background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 16px 12px; text-align: center; cursor: pointer; transition: all var(--transition);
+  display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 100px; justify-content: center;
+  position: relative;
+}
+.doc-item:hover { border-color: var(--border-hover); background: var(--bg-hover); }
+.doc-item-icon { font-size: 32px; }
+.doc-item-name { font-size: 12px; word-break: break-word; line-height: 1.3; max-height: 2.6em; overflow: hidden; }
+.doc-item-size { font-size: 11px; color: var(--text-muted); }
+.doc-item-menu {
+  position: absolute; top: 4px; right: 4px; display: none;
+}
+.doc-item:hover .doc-item-menu { display: flex; }
+.doc-context-menu {
+  position: fixed; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg); z-index: 250; padding: 4px 0; min-width: 160px;
+}
+.doc-context-menu button {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; font-size: 13px;
+  color: var(--text-primary); background: none; border: none; cursor: pointer; text-align: left;
+}
+.doc-context-menu button:hover { background: var(--bg-hover); }
+
 /* ── AGENDA LAYOUT ── */
 .agenda-layout { display: flex; flex-direction: column; gap: 16px; }
 .agenda-sidebar { display: flex; flex-direction: column; gap: 0; }
@@ -949,10 +974,41 @@ tr:hover td { background: var(--bg-hover); }
 
       <!-- DOCUMENTOS -->
       <div class="page" id="page-docs">
-        <div class="empty-state">
-          <div class="empty-state-icon">&#x1F4C4;</div>
-          <p class="empty-state-text">Documentos — em breve</p>
+        <!-- Breadcrumb -->
+        <div id="docs-breadcrumb" style="display:flex;align-items:center;gap:6px;margin-bottom:16px;font-size:13px;color:var(--text-secondary);flex-wrap:wrap;"></div>
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
+          <span></span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="openNewFolder()">+ Pasta</button>
+            <button class="btn btn-primary btn-sm" onclick="triggerUpload()">&#x2B06; Upload</button>
+          </div>
         </div>
+
+        <!-- Drop zone -->
+        <div id="docs-dropzone" style="display:none;border:2px dashed var(--accent);border-radius:var(--radius-md);padding:32px;text-align:center;color:var(--accent);margin-bottom:16px;">
+          Solte os arquivos aqui
+        </div>
+
+        <!-- Grid de pastas e arquivos -->
+        <div id="docs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+
+        <!-- Empty state -->
+        <div id="docs-empty" class="empty-state" style="display:none;">
+          <div class="empty-state-icon">&#x1F4C2;</div>
+          <p class="empty-state-text">Pasta vazia</p>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="openNewFolder()">Nova pasta</button>
+            <button class="btn btn-primary btn-sm" onclick="triggerUpload()">Upload</button>
+          </div>
+        </div>
+
+        <!-- Upload progress -->
+        <div id="docs-upload-progress" style="display:none;margin-top:16px;"></div>
+
+        <!-- Input file oculto -->
+        <input type="file" id="docs-file-input" multiple style="display:none;" onchange="docsHandleFiles(this.files)">
       </div>
 
       <!-- CEDTEC -->

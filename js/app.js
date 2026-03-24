@@ -13,7 +13,7 @@ import * as utils from './core/utils.js';
 import * as dashboard from './modules/dashboard.js';
 import * as tasks from './modules/tasks.js';
 import * as agenda from './modules/agenda.js';
-// import * as docs from './modules/docs.js';
+import * as docs from './modules/docs.js';
 // import * as chat from './modules/chat.js';
 // import * as sitio from './modules/sitio.js';
 // import * as cedtec from './modules/cedtec.js';
@@ -173,6 +173,7 @@ window.goPage = (page) => {
   if (page === 'dashboard') dashboard.loadDashboard();
   if (page === 'tasks') tasks.loadTasks();
   if (page === 'agenda') agenda.loadAgenda();
+  if (page === 'docs') docs.loadDocs();
 };
 window.toggleSidebar = toggleSidebar;
 
@@ -204,14 +205,21 @@ window.agendaNextMonth = () => agenda.nextMonth();
 window.agendaClickDay = (y, m, d) => agenda.clickDay(y, m, d);
 window.evToggleDiaInteiro = () => agenda.toggleDiaInteiro();
 
-// DOCUMENTOS (quando implementado)
-// window.openNewFolder = () => docs.openNewFolder();
-// window.navigateFolder = (id) => docs.navigateFolder(id);
-// window.triggerUpload = () => docs.triggerUpload();
-// window.downloadDoc = (id) => docs.downloadDoc(id);
-// window.deleteDoc = (id) => docs.deleteDoc(id);
-// window.openFileViewer = (url, tipo) => docs.openFileViewer(url, tipo);
-// window.shareDoc = (id) => docs.shareDoc(id);
+// DOCUMENTOS
+window.openNewFolder = () => docs.openNewFolder();
+window.navigateFolder = (id) => docs.navigateFolder(id);
+window.triggerUpload = () => docs.triggerUpload();
+window.downloadDoc = (id) => docs.downloadDoc(id);
+window.deleteDoc = (id) => docs.deleteDoc(id);
+window.openFileViewer = (url, tipo) => docs.openFileViewer(url, tipo);
+window.shareDoc = (id) => docs.shareDoc(id);
+window.docsSaveFolder = () => docs.saveFolder();
+window.docsHandleFiles = (files) => docs.handleFiles(files);
+window.docsContextFolder = (id, e) => docs.contextFolder(id, e);
+window.docsContextFile = (id, e) => docs.contextFile(id, e);
+window.docsRenameFolder = (id) => docs.renameFolder(id);
+window.docsDeleteFolder = (id) => docs.deleteFolder(id);
+window.docsDeleteFile = (id) => docs.deleteDoc(id);
 
 // CHAT (quando implementado)
 // window.sendMsg = () => chat.sendMsg();
