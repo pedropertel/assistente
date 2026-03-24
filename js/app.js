@@ -15,7 +15,7 @@ import * as tasks from './modules/tasks.js';
 import * as agenda from './modules/agenda.js';
 import * as docs from './modules/docs.js';
 // import * as chat from './modules/chat.js';
-// import * as sitio from './modules/sitio.js';
+import * as sitio from './modules/sitio.js';
 // import * as cedtec from './modules/cedtec.js';
 // import * as config from './modules/config.js';
 
@@ -174,6 +174,7 @@ window.goPage = (page) => {
   if (page === 'tasks') tasks.loadTasks();
   if (page === 'agenda') agenda.loadAgenda();
   if (page === 'docs') docs.loadDocs();
+  if (page === 'sitio') sitio.loadSitio();
 };
 window.toggleSidebar = toggleSidebar;
 
@@ -228,14 +229,20 @@ window.docsDeleteFile = (id) => docs.deleteDoc(id);
 // window.selectAgente = (slug) => chat.selectAgente(slug);
 // window.saveMemoria = (agenteSlug, texto) => chat.saveMemoria(agenteSlug, texto);
 
-// SÍTIO (quando implementado)
-// window.sitioTab = (tab) => sitio.tab(tab);
-// window.openNewLanc = () => sitio.openNewLanc();
-// window.openEditLanc = (id) => sitio.openEditLanc(id);
-// window.deleteLanc = (id) => sitio.deleteLanc(id);
-// window.openNewCentro = () => sitio.openNewCentro();
-// window.openEditCentro = (id) => sitio.openEditCentro(id);
-// window.deleteCentro = (id) => sitio.deleteCentro(id);
+// SÍTIO
+window.sitioTab = (t) => sitio.tab(t);
+window.openNewLanc = () => sitio.openNewLanc();
+window.openEditLanc = (id) => sitio.openEditLanc(id);
+window.deleteLanc = (id) => sitio.deleteLanc(id);
+window.openNewCentro = () => sitio.openNewCentro();
+window.openEditCentro = (id) => sitio.openEditCentro(id);
+window.deleteCentro = (id) => sitio.deleteCentro(id);
+window.sitioSaveLanc = (id) => sitio.saveLanc(id);
+window.sitioSaveCentro = (id) => sitio.saveCentro(id);
+window.sitioViewAttach = (url) => sitio.viewAttach(url);
+window.sitioFilterCentro = (v) => sitio.setFilterCentro(v);
+window.sitioFilterTipo = (v) => sitio.setFilterTipo(v);
+window.sitioToggleDatas = () => sitio.toggleDatas();
 
 // CEDTEC (quando implementado)
 // window.cedtecTab = (tab) => cedtec.tab(tab);

@@ -1021,9 +1021,72 @@ tr:hover td { background: var(--bg-hover); }
 
       <!-- SITIO -->
       <div class="page" id="page-sitio">
-        <div class="empty-state">
-          <div class="empty-state-icon">&#x1F331;</div>
-          <p class="empty-state-text">Sitio — em breve</p>
+        <!-- Sub-abas -->
+        <div class="tabs" style="margin-bottom:16px;">
+          <button class="tab active" onclick="sitioTab('visao')">Visao Geral</button>
+          <button class="tab" onclick="sitioTab('lancamentos')">Lancamentos</button>
+          <button class="tab" onclick="sitioTab('centros')">Centros de Custo</button>
+          <button class="tab" onclick="sitioTab('cronograma')">Cronograma</button>
+          <button class="tab" onclick="sitioTab('relatorios')">Relatorios</button>
+        </div>
+
+        <!-- VISAO GERAL -->
+        <div id="sitio-tab-visao">
+          <div class="stat-cards" id="sitio-stats"></div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title" style="margin-bottom:12px;">Investimento por centro de custo</div>
+            <div id="sitio-barras"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Ultimos lancamentos</span>
+              <button class="btn btn-ghost btn-sm" onclick="sitioTab('lancamentos')">Ver todos</button>
+            </div>
+            <div id="sitio-ultimos"></div>
+          </div>
+        </div>
+
+        <!-- LANCAMENTOS -->
+        <div id="sitio-tab-lancamentos" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;" id="sitio-lanc-filters"></div>
+            <button class="btn btn-primary btn-sm" onclick="openNewLanc()">+ Lancamento</button>
+          </div>
+          <div class="table-wrap">
+            <table id="sitio-lanc-table">
+              <thead><tr><th>Data</th><th>Descricao</th><th>Centro</th><th>Tipo</th><th>Valor</th><th></th><th></th></tr></thead>
+              <tbody id="sitio-lanc-body"></tbody>
+            </table>
+          </div>
+          <div id="sitio-lanc-empty" class="empty-state" style="display:none;">
+            <div class="empty-state-icon">&#x1F4B0;</div>
+            <p class="empty-state-text">Nenhum lancamento</p>
+            <button class="btn btn-primary btn-sm" onclick="openNewLanc()">Registrar</button>
+          </div>
+        </div>
+
+        <!-- CENTROS DE CUSTO -->
+        <div id="sitio-tab-centros" style="display:none;">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+            <button class="btn btn-primary btn-sm" onclick="openNewCentro()">+ Novo centro</button>
+          </div>
+          <div id="sitio-centros-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;"></div>
+        </div>
+
+        <!-- CRONOGRAMA -->
+        <div id="sitio-tab-cronograma" style="display:none;">
+          <div class="card"><canvas id="sitio-chart-crono" height="300"></canvas></div>
+        </div>
+
+        <!-- RELATORIOS -->
+        <div id="sitio-tab-relatorios" style="display:none;">
+          <div style="display:grid;grid-template-columns:1fr;gap:16px;">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:12px;">Por centro de custo</div>
+              <canvas id="sitio-chart-pizza" height="300"></canvas>
+            </div>
+            <div class="card" id="sitio-resumo-fin"></div>
+          </div>
         </div>
       </div>
 
