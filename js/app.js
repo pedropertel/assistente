@@ -10,7 +10,7 @@ import * as store from './core/store.js';
 import * as utils from './core/utils.js';
 
 // Módulos (importar conforme implementados)
-// import * as dashboard from './modules/dashboard.js';
+import * as dashboard from './modules/dashboard.js';
 // import * as tasks from './modules/tasks.js';
 // import * as agenda from './modules/agenda.js';
 // import * as docs from './modules/docs.js';
@@ -85,6 +85,7 @@ async function initApp(session) {
   setupKeyboard();
   await loadEntidades();
   router.goPage('dashboard');
+  dashboard.loadDashboard();
 }
 
 // ══════════════════════════════════════════

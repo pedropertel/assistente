@@ -633,6 +633,12 @@ tr:hover td { background: var(--bg-hover); }
 /* ── LARGE DESKTOP ── */
 @media (min-width: 1024px) {
   .stat-cards { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  #page-dashboard .card { min-height: 0; }
+}
+
+/* ── DASHBOARD CHARTS GRID ── */
+@media (min-width: 768px) {
+  #page-dashboard > div:nth-child(3) { grid-template-columns: 1fr 1fr; }
 }
   </style>
 </head>
@@ -719,9 +725,86 @@ tr:hover td { background: var(--bg-hover); }
     <div class="content">
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
-        <div class="empty-state">
-          <div class="empty-state-icon">&#x1F4CA;</div>
-          <p class="empty-state-text">Dashboard — em breve</p>
+        <!-- Alertas proativos -->
+        <div id="dash-alerts"></div>
+
+        <!-- Stat Cards -->
+        <div class="stat-cards" id="dash-stats">
+          <div class="stat-card" onclick="goPage('tasks')">
+            <div class="stat-card-header">
+              <span class="stat-card-icon">&#x2705;</span>
+              <span class="stat-card-label">Pendentes</span>
+            </div>
+            <div class="stat-card-value" id="dash-pendentes">—</div>
+            <div class="stat-card-change" id="dash-pendentes-sub">tarefas</div>
+          </div>
+          <div class="stat-card" onclick="goPage('tasks')">
+            <div class="stat-card-header">
+              <span class="stat-card-icon">&#x1F534;</span>
+              <span class="stat-card-label">Urgentes</span>
+            </div>
+            <div class="stat-card-value" id="dash-urgentes">—</div>
+            <div class="stat-card-change" id="dash-urgentes-sub">tarefas</div>
+          </div>
+          <div class="stat-card" onclick="goPage('agenda')">
+            <div class="stat-card-header">
+              <span class="stat-card-icon">&#x1F4C5;</span>
+              <span class="stat-card-label">Hoje</span>
+            </div>
+            <div class="stat-card-value" id="dash-eventos">—</div>
+            <div class="stat-card-change" id="dash-eventos-sub">eventos</div>
+          </div>
+          <div class="stat-card" onclick="goPage('cedtec')">
+            <div class="stat-card-header">
+              <span class="stat-card-icon">&#x1F4B0;</span>
+              <span class="stat-card-label">Meta</span>
+            </div>
+            <div class="stat-card-value" id="dash-saldo">—</div>
+            <div class="stat-card-change" id="dash-saldo-sub">saldo</div>
+          </div>
+        </div>
+
+        <!-- Graficos -->
+        <div style="display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:20px;">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Performance — 7 dias</span>
+            </div>
+            <canvas id="dash-chart-line" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Tarefas por empresa</span>
+            </div>
+            <canvas id="dash-chart-doughnut" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Tarefas recentes -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Tarefas recentes</span>
+            <button class="btn btn-ghost btn-sm" onclick="goPage('tasks')">Ver todas</button>
+          </div>
+          <div class="table-wrap">
+            <table id="dash-tasks-table">
+              <thead>
+                <tr>
+                  <th>Titulo</th>
+                  <th>Empresa</th>
+                  <th>Prioridade</th>
+                  <th>Status</th>
+                  <th>Vencimento</th>
+                </tr>
+              </thead>
+              <tbody id="dash-tasks-body"></tbody>
+            </table>
+          </div>
+          <div id="dash-tasks-empty" class="empty-state" style="display:none;">
+            <div class="empty-state-icon">&#x2705;</div>
+            <p class="empty-state-text">Nenhuma tarefa ainda</p>
+            <button class="btn btn-primary btn-sm" onclick="goPage('tasks')">Criar tarefa</button>
+          </div>
         </div>
       </div>
 
