@@ -647,6 +647,34 @@ tr:hover td { background: var(--bg-hover); }
   #page-dashboard .card { min-height: 0; }
 }
 
+/* ── AGENDA LAYOUT ── */
+.agenda-layout { display: flex; flex-direction: column; gap: 16px; }
+.agenda-sidebar { display: flex; flex-direction: column; gap: 0; }
+.mini-calendar { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; gap: 2px; }
+.mini-calendar .cal-header { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 4px 0; }
+.mini-calendar .cal-day { padding: 6px 0; border-radius: var(--radius-sm); cursor: pointer; min-height: 32px; display: flex; align-items: center; justify-content: center; position: relative; transition: background var(--transition); }
+.mini-calendar .cal-day:hover { background: var(--bg-hover); }
+.mini-calendar .cal-day.today { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.mini-calendar .cal-day.selected { background: var(--accent); color: #fff; }
+.mini-calendar .cal-day.other-month { color: var(--text-muted); opacity: 0.4; }
+.mini-calendar .cal-day .cal-dot { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.agenda-event-group { margin-bottom: 16px; }
+.agenda-event-group-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.agenda-event-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: border-color var(--transition); }
+.agenda-event-card:hover { border-color: var(--border-hover); }
+.agenda-event-time { font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; min-width: 50px; }
+.agenda-event-info { flex: 1; min-width: 0; }
+.agenda-event-title { font-size: 14px; font-weight: 500; }
+.agenda-event-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.agenda-event-actions { display: none; gap: 4px; }
+.agenda-event-card:hover .agenda-event-actions { display: flex; }
+
+@media (min-width: 768px) {
+  .agenda-layout { flex-direction: row; }
+  .agenda-sidebar { width: 280px; flex-shrink: 0; }
+  .agenda-events { flex: 1; min-width: 0; }
+}
+
 /* ── DASHBOARD CHARTS GRID ── */
 @media (min-width: 768px) {
   #page-dashboard > div:nth-child(3) { grid-template-columns: 1fr 1fr; }
@@ -882,9 +910,40 @@ tr:hover td { background: var(--bg-hover); }
 
       <!-- AGENDA -->
       <div class="page" id="page-agenda">
-        <div class="empty-state">
-          <div class="empty-state-icon">&#x1F4C5;</div>
-          <p class="empty-state-text">Agenda — em breve</p>
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <span></span>
+          <button class="btn btn-primary btn-sm" onclick="openNewEvent()">+ Novo evento</button>
+        </div>
+
+        <div class="agenda-layout">
+          <!-- Coluna esquerda: calendário + resumo -->
+          <div class="agenda-sidebar">
+            <!-- Mini calendário -->
+            <div class="card" style="margin-bottom:12px;">
+              <div class="card-header">
+                <button class="btn-icon" onclick="agendaPrevMonth()">&#x25C0;</button>
+                <span class="card-title" id="agenda-month-title"></span>
+                <button class="btn-icon" onclick="agendaNextMonth()">&#x25B6;</button>
+              </div>
+              <div id="agenda-calendar" class="mini-calendar"></div>
+            </div>
+            <!-- Resumo -->
+            <div class="card">
+              <div class="card-title" style="margin-bottom:12px;">Resumo</div>
+              <div id="agenda-resumo" style="font-size:13px;color:var(--text-secondary);"></div>
+            </div>
+          </div>
+
+          <!-- Coluna direita: lista de eventos -->
+          <div class="agenda-events">
+            <div id="agenda-list"></div>
+            <div id="agenda-empty" class="empty-state" style="display:none;">
+              <div class="empty-state-icon">&#x1F4C5;</div>
+              <p class="empty-state-text">Nenhum evento agendado</p>
+              <button class="btn btn-primary btn-sm" onclick="openNewEvent()">Criar evento</button>
+            </div>
+          </div>
         </div>
       </div>
 

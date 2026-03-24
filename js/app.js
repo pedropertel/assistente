@@ -12,7 +12,7 @@ import * as utils from './core/utils.js';
 // Módulos (importar conforme implementados)
 import * as dashboard from './modules/dashboard.js';
 import * as tasks from './modules/tasks.js';
-// import * as agenda from './modules/agenda.js';
+import * as agenda from './modules/agenda.js';
 // import * as docs from './modules/docs.js';
 // import * as chat from './modules/chat.js';
 // import * as sitio from './modules/sitio.js';
@@ -146,8 +146,7 @@ function setupKeyboard() {
         if (router.getCurrentPage() === 'tasks') tasks.openNewTask();
         break;
       case 'E': case 'e':
-        // Atalho para novo evento (quando implementado)
-        // if (router.getCurrentPage() === 'agenda') agenda.openNewEvent();
+        if (router.getCurrentPage() === 'agenda') agenda.openNewEvent();
         break;
     }
   });
@@ -173,6 +172,7 @@ window.goPage = (page) => {
   // Carregar módulo ao navegar
   if (page === 'dashboard') dashboard.loadDashboard();
   if (page === 'tasks') tasks.loadTasks();
+  if (page === 'agenda') agenda.loadAgenda();
 };
 window.toggleSidebar = toggleSidebar;
 
@@ -194,10 +194,15 @@ window.taskSave = (id) => tasks.saveTask(id);
 window.tasksFilter = (id) => tasks.filterTasks(id);
 window.tasksShowCol = (status) => tasks.showCol(status);
 
-// AGENDA (quando implementado)
-// window.openNewEvent = () => agenda.openNewEvent();
-// window.openEditEvent = (id) => agenda.openEditEvent(id);
-// window.deleteEvent = (id) => agenda.deleteEvent(id);
+// AGENDA
+window.openNewEvent = () => agenda.openNewEvent();
+window.openEditEvent = (id) => agenda.openEditEvent(id);
+window.deleteEvent = (id) => agenda.deleteEvent(id);
+window.eventSave = (id) => agenda.saveEvent(id);
+window.agendaPrevMonth = () => agenda.prevMonth();
+window.agendaNextMonth = () => agenda.nextMonth();
+window.agendaClickDay = (y, m, d) => agenda.clickDay(y, m, d);
+window.evToggleDiaInteiro = () => agenda.toggleDiaInteiro();
 
 // DOCUMENTOS (quando implementado)
 // window.openNewFolder = () => docs.openNewFolder();
