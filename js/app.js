@@ -223,6 +223,7 @@ window.docsContextFolder = (id, e) => docs.contextFolder(id, e);
 window.docsContextFile = (id, e) => docs.contextFile(id, e);
 window.docsRenameFolder = (id) => docs.renameFolder(id);
 window.docsDeleteFolder = (id) => docs.deleteFolder(id);
+window.docsRenameFile = (id) => docs.renameFile(id);
 window.docsDeleteFile = (id) => docs.deleteDoc(id);
 
 // CHAT

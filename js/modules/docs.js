@@ -151,6 +151,7 @@ export function contextFile(id, e) {
   menu.style.top = e.clientY + 'px';
   menu.innerHTML = `
     <button onclick="openFileViewer('${f.arquivo_url || ''}','${f.arquivo_tipo || ''}')">&#x1F441; Visualizar</button>
+    <button onclick="docsRenameFile('${id}')">&#x270F;&#xFE0F; Renomear</button>
     <button onclick="downloadDoc('${id}')">&#x2B07; Download</button>
     <button onclick="shareDoc('${id}')">&#x1F517; Compartilhar</button>
     <button onclick="docsDeleteFile('${id}')" style="color:var(--danger)">&#x1F5D1; Excluir</button>
@@ -351,6 +352,24 @@ export async function shareDoc(id) {
     } catch {
       toast.show('Nao foi possivel copiar', 'error');
     }
+  }
+}
+
+// ── RENOMEAR ARQUIVO ──
+
+export async function renameFile(id) {
+  closeContextMenu();
+  const f = files.find(x => x.id === id);
+  if (!f) return;
+  const nome = prompt('Novo nome:', f.nome || f.arquivo_nome);
+  if (!nome || nome === f.nome) return;
+  try {
+    const { error } = await supabase.from('documentos').update({ nome }).eq('id', id);
+    if (error) throw error;
+    toast.show('Arquivo renomeado', 'success');
+    await navigateFolder(currentFolderId);
+  } catch (e) {
+    toast.show('Erro ao renomear', 'error');
   }
 }
 
