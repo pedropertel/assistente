@@ -242,7 +242,14 @@ export async function sendMsg() {
               finalData = parsed;
             } else if (parsed.token) {
               fullText += parsed.token;
-              if (bubble) bubble.innerHTML = renderMarkdown(fullText);
+              // Mostrar texto sem tags de ação/memória durante streaming
+              const display = fullText
+                .replace(/---ACTION---[\s\S]*?---END_ACTION---/g, '')
+                .replace(/---MEMORY---[\s\S]*?---END_MEMORY---/g, '')
+                .replace(/---ACTION---[\s\S]*$/g, '')
+                .replace(/---MEMORY---[\s\S]*$/g, '')
+                .trim();
+              if (bubble) bubble.innerHTML = renderMarkdown(display);
               scrollToBottom();
             }
           } catch {}
@@ -258,11 +265,13 @@ export async function sendMsg() {
         } catch {}
       }
 
-      if (bubble) bubble.innerHTML = renderMarkdown(fullText || 'Sem resposta');
+      // Usar texto limpo (sem tags ACTION/MEMORY) se disponível
+      const cleanReply = finalData?.reply || fullText || '';
+      if (bubble) bubble.innerHTML = renderMarkdown(cleanReply || 'Sem resposta');
 
       // Processar action e memory_suggest
       if (finalData) {
-        await processResponse(finalData, fullText, slug);
+        await processResponse(finalData, cleanReply, slug);
       }
     } else {
       // Fallback: resposta completa de uma vez
