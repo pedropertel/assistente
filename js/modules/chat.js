@@ -425,6 +425,17 @@ export function attachFile() {
           if (preview) preview.style.display = 'flex';
         };
         reader.readAsDataURL(file);
+      } else if (isExcelFile(file.name)) {
+        // Excel: converter para texto com SheetJS
+        try {
+          const text = await readExcelAsText(file);
+          pendingFile = { name: file.name, type: file.type, content: text, isImage: false };
+          const rows = text.split('\n').length;
+          if (nameEl) nameEl.textContent = `📊 ${file.name} (${rows} linhas)`;
+          if (preview) preview.style.display = 'flex';
+        } catch (e) {
+          toast.show('Erro ao ler planilha', 'error');
+        }
       } else {
         // Texto/CSV/MD/JSON: ler como texto
         try {
@@ -440,6 +451,29 @@ export function attachFile() {
     };
     input.click();
   }
+}
+
+function isExcelFile(name) {
+  return /\.(xlsx|xls|xlsm)$/i.test(name);
+}
+
+async function readExcelAsText(file) {
+  const XLSX = window.XLSX;
+  if (!XLSX) throw new Error('SheetJS nao carregado');
+
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: 'array' });
+
+  let result = '';
+  for (const sheetName of workbook.SheetNames) {
+    const sheet = workbook.Sheets[sheetName];
+    const csv = XLSX.utils.sheet_to_csv(sheet, { FS: ' | ', blankrows: false });
+    if (workbook.SheetNames.length > 1) {
+      result += `\n=== Aba: ${sheetName} ===\n`;
+    }
+    result += csv + '\n';
+  }
+  return result.trim();
 }
 
 export function removeAttachment() {

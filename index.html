@@ -1002,7 +1002,7 @@ tr:hover td { background: var(--bg-hover); }
             <textarea class="input" id="chat-input" rows="1" placeholder="Digite sua mensagem..." style="resize:none;min-height:44px;max-height:120px;" onkeydown="chatKeyDown(event)"></textarea>
             <button class="btn btn-primary btn-icon" onclick="sendMsg()" title="Enviar" style="flex-shrink:0;">&#x25B6;</button>
           </div>
-          <input type="file" id="chat-file-input" style="display:none;" accept=".pdf,.txt,.csv,.md,.json,.png,.jpg,.jpeg,.gif,.webp">
+          <input type="file" id="chat-file-input" style="display:none;" accept=".pdf,.txt,.csv,.md,.json,.xlsx,.xls,.xlsm,.png,.jpg,.jpeg,.gif,.webp">
         </div>
       </div>
 
@@ -1385,6 +1385,9 @@ tr:hover td { background: var(--bg-hover); }
 
 <!-- Chart.js 4 -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+
+<!-- SheetJS — leitura de Excel (.xlsx/.xls) no browser -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <!-- App modules -->
 <script type="module" src="/js/app.js"></script>

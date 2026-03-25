@@ -370,6 +370,21 @@ export async function uploadIntelFile() {
       let conteudoTexto = null;
       if (file.type === 'text/plain' || file.name.endsWith('.md') || file.name.endsWith('.csv') || file.name.endsWith('.json')) {
         conteudoTexto = await file.text();
+      } else if (/\.(xlsx|xls|xlsm)$/i.test(file.name) && window.XLSX) {
+        // Excel: converter para texto
+        try {
+          const buffer = await file.arrayBuffer();
+          const wb = window.XLSX.read(buffer, { type: 'array' });
+          let text = '';
+          for (const name of wb.SheetNames) {
+            const csv = window.XLSX.utils.sheet_to_csv(wb.Sheets[name], { FS: ' | ', blankrows: false });
+            if (wb.SheetNames.length > 1) text += `\n=== Aba: ${name} ===\n`;
+            text += csv + '\n';
+          }
+          conteudoTexto = text.trim();
+        } catch (e) {
+          console.warn('Erro ao ler Excel:', e);
+        }
       }
 
       await supabase.from('agente_arquivos').insert({
