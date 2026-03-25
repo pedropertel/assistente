@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
     let systemPrompt: string;
     let messages: Array<{ role: string; content: string }>;
 
-    if (agente_slug && agente_persona) {
+    if (agente_slug) {
       // ── MODO AGENTE ──
       systemPrompt = buildAgentePrompt(
         agente_persona,
