@@ -237,6 +237,7 @@ window.dismissMemoria = () => chat.dismissMemoria();
 window.chatKeyDown = (e) => chat.keyDown(e);
 window.chatAttachFile = () => chat.attachFile();
 window.chatRemoveAttachment = () => chat.removeAttachment();
+window.clearChatHistory = () => chat.clearChatHistory();
 
 // SÍTIO
 window.sitioTab = (t) => sitio.tab(t);

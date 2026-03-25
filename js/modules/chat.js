@@ -629,6 +629,21 @@ export function clearChat() {
   if (container) container.innerHTML = '';
 }
 
+export async function clearChatHistory() {
+  if (!confirm('Limpar todo o historico desta conversa?')) return;
+  const slug = currentAgente?.slug || null;
+  try {
+    let q = supabase.from('chat_mensagens').delete();
+    if (slug) q = q.eq('agente_slug', slug);
+    else q = q.is('agente_slug', null);
+    await q;
+    clearChat();
+    toast.show('Historico limpo', 'success');
+  } catch (e) {
+    toast.show('Erro ao limpar', 'error');
+  }
+}
+
 // ── HELPERS ──
 
 function esc(str) {

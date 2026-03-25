@@ -977,10 +977,11 @@ tr:hover td { background: var(--bg-hover); }
           <div id="chat-header" style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:12px;">
             <button class="btn-icon" onclick="showAgentGrid()">&#x25C0;</button>
             <div id="chat-agent-avatar" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:16px;"></div>
-            <div>
+            <div style="flex:1;">
               <div id="chat-agent-name" style="font-weight:600;font-size:15px;"></div>
               <div id="chat-agent-desc" style="font-size:12px;color:var(--text-muted);"></div>
             </div>
+            <button class="btn-icon" onclick="clearChatHistory()" title="Limpar historico" style="color:var(--text-muted);">&#x1F5D1;</button>
           </div>
 
           <!-- Mensagens -->
