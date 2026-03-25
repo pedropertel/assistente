@@ -1001,15 +1001,13 @@ tr:hover td { background: var(--bg-hover); }
       <!-- TAREFAS -->
       <div class="page" id="page-tasks">
         <!-- Header do módulo -->
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <span id="tasks-urgente-badge" class="badge badge-prio-urgente" style="display:none;"></span>
-          </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:16px;">
+          <span id="tasks-urgente-badge" class="badge badge-prio-urgente" style="display:none;"></span>
           <button class="btn btn-primary btn-sm" onclick="openNewTask()">+ Nova tarefa</button>
         </div>
 
         <!-- Filtro por empresa -->
-        <div class="chips" id="tasks-filter"></div>
+        <div class="chips" id="tasks-filter" style="justify-content:center;"></div>
 
         <!-- Mobile: pills de coluna -->
         <div class="tabs" id="tasks-mobile-tabs" style="display:none;">
@@ -1053,12 +1051,6 @@ tr:hover td { background: var(--bg-hover); }
 
       <!-- AGENDA -->
       <div class="page" id="page-agenda">
-        <!-- Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-          <span></span>
-          <button class="btn btn-primary btn-sm" onclick="openNewEvent()">+ Novo evento</button>
-        </div>
-
         <div class="agenda-layout">
           <!-- Coluna esquerda: calendário + resumo -->
           <div class="agenda-sidebar">
@@ -1071,6 +1063,8 @@ tr:hover td { background: var(--bg-hover); }
               </div>
               <div id="agenda-calendar" class="mini-calendar"></div>
             </div>
+            <!-- Botão novo evento -->
+            <button class="btn btn-primary" onclick="openNewEvent()" style="width:100%;margin-bottom:12px;">+ Novo evento</button>
             <!-- Resumo -->
             <div class="card">
               <div class="card-title" style="margin-bottom:12px;">Resumo</div>
@@ -1084,7 +1078,6 @@ tr:hover td { background: var(--bg-hover); }
             <div id="agenda-empty" class="empty-state" style="display:none;">
               <div class="empty-state-icon">&#x1F4C5;</div>
               <p class="empty-state-text">Nenhum evento agendado</p>
-              <button class="btn btn-primary btn-sm" onclick="openNewEvent()">Criar evento</button>
             </div>
           </div>
         </div>
