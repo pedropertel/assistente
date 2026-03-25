@@ -78,6 +78,26 @@ export async function selectAgente(slug) {
   // Carregar histórico
   await loadHistory(slug);
 
+  // Auto-briefing: se última mensagem > 1h ou sem histórico, pedir briefing
+  if (slug) {
+    try {
+      const { data: lastMsg } = await supabase.from('chat_mensagens')
+        .select('created_at')
+        .eq('agente_slug', slug)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      const isStale = !lastMsg || (Date.now() - new Date(lastMsg.created_at).getTime() > 3600000);
+      if (isStale) {
+        setTimeout(() => sendAutoMsg('Briefing rapido: o que preciso saber agora?'), 300);
+      }
+    } catch {
+      // Sem histórico — enviar briefing
+      setTimeout(() => sendAutoMsg('Briefing rapido: o que preciso saber agora?'), 300);
+    }
+  }
+
   // Focus no input
   document.getElementById('chat-input')?.focus();
 }
@@ -202,14 +222,7 @@ export async function sendMsg() {
               finalData = parsed;
             } else if (parsed.token) {
               fullText += parsed.token;
-              // Mostrar texto sem tags de ação/memória durante streaming
-              const display = fullText
-                .replace(/---ACTION---[\s\S]*?---END_ACTION---/g, '')
-                .replace(/---MEMORY---[\s\S]*?---END_MEMORY---/g, '')
-                .replace(/---ACTION---[\s\S]*$/g, '')
-                .replace(/---MEMORY---[\s\S]*$/g, '')
-                .trim();
-              if (bubble) bubble.innerHTML = renderMarkdown(display);
+              if (bubble) bubble.innerHTML = renderMarkdown(fullText);
               scrollToBottom();
             }
           } catch {}
@@ -251,76 +264,86 @@ export async function sendMsg() {
 
 async function processResponse(data, replyText, slug) {
   // Salvar resposta no banco
+  const firstTool = data.tool_calls?.[0];
   try {
     await supabase.from('chat_mensagens').insert({
       role: 'assistant',
       conteudo: replyText || data.reply || '',
       contexto: slug || 'geral',
       agente_slug: slug,
-      acao_executada: data.action || null,
-      acao_dados: data.actionData || null,
+      acao_executada: firstTool?.name || null,
+      acao_dados: firstTool?.input || null,
     });
   } catch (e) {
     console.error('Erro ao salvar resposta:', e);
   }
 
-  // Executar action
-  if (data.action && data.actionData) {
-    await handleAction(data.action, data.actionData);
-    appendActionChip(data.action, data.actionData);
-  }
-
-  // Memory suggest
-  if (data.memory_suggest && slug) {
-    showMemorySuggest(slug, data.memory_suggest);
+  // Processar tool calls (v3 — tool_use nativo)
+  if (data.tool_calls && data.tool_calls.length > 0) {
+    for (const call of data.tool_calls) {
+      await handleToolCall(call);
+    }
   }
 }
 
-// ── ACTIONS ──
-
-async function handleAction(action, actionData) {
+async function handleToolCall(call) {
   try {
-    switch (action) {
-      case 'tarefa':
+    switch (call.name) {
+      case 'criar_tarefa': {
+        const d = call.input;
         await supabase.from('tarefas').insert({
-          titulo: actionData.titulo,
-          descricao: actionData.descricao || null,
-          entidade_id: actionData.entidade_id || null,
-          prioridade: actionData.prioridade || 'media',
-          data_vencimento: actionData.data_vencimento || null,
-          lembrete_em: actionData.lembrete_em || null,
+          titulo: d.titulo,
+          descricao: d.descricao || null,
+          entidade_id: d.entidade_id || null,
+          prioridade: d.prioridade || 'media',
+          data_vencimento: d.data_vencimento || null,
         });
-        toast.show('Tarefa criada', 'success');
+        toast.show('Tarefa criada: ' + d.titulo, 'success');
+        appendActionChip('tarefa', d);
         break;
-
-      case 'evento':
+      }
+      case 'criar_evento': {
+        const d = call.input;
         await supabase.from('eventos').insert({
-          titulo: actionData.titulo,
-          data_inicio: actionData.data_inicio,
-          data_fim: actionData.data_fim || null,
-          local: actionData.local || null,
-          entidade_id: actionData.entidade_id || null,
-          dia_inteiro: actionData.dia_inteiro || false,
+          titulo: d.titulo,
+          data_inicio: d.data_inicio,
+          data_fim: d.data_fim || null,
+          local: d.local || null,
+          entidade_id: d.entidade_id || null,
+          dia_inteiro: d.dia_inteiro || false,
         });
-        toast.show('Evento criado', 'success');
+        toast.show('Evento criado: ' + d.titulo, 'success');
+        appendActionChip('evento', d);
         break;
-
-      case 'gasto':
+      }
+      case 'registrar_gasto': {
+        const d = call.input;
         await supabase.from('sitio_lancamentos').insert({
-          descricao: actionData.descricao,
-          valor: actionData.valor,
-          centro_custo_id: actionData.centro_custo_id || null,
-          tipo: actionData.tipo || 'realizado',
-          data_realizada: actionData.data_realizada || new Date().toISOString().slice(0, 10),
+          descricao: d.descricao,
+          valor: d.valor,
+          centro_custo_id: d.centro_custo_id || null,
+          tipo: d.tipo || 'realizado',
+          data_realizada: d.data_realizada || new Date().toISOString().slice(0, 10),
         });
-        toast.show('Lancamento registrado', 'success');
+        toast.show('Gasto registrado: ' + d.descricao, 'success');
+        appendActionChip('gasto', d);
         break;
+      }
+      case 'sugerir_memoria': {
+        const slug = currentAgente?.slug;
+        if (slug && call.input.texto) {
+          showMemorySuggest(slug, call.input.texto);
+        }
+        break;
+      }
     }
   } catch (e) {
-    console.error('Action error:', e);
+    console.error('Tool call error:', e);
     toast.show('Erro ao executar acao', 'error');
   }
 }
+
+// handleAction removido — substituído por handleToolCall (tool_use nativo)
 
 function appendActionChip(action, data) {
   const container = document.getElementById('chat-messages');
@@ -584,6 +607,14 @@ function renderMarkdown(text) {
 function scrollToBottom() {
   const container = document.getElementById('chat-messages');
   if (container) setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+}
+
+async function sendAutoMsg(text) {
+  const input = document.getElementById('chat-input');
+  if (input) {
+    input.value = text;
+    await sendMsg();
+  }
 }
 
 export function keyDown(e) {
