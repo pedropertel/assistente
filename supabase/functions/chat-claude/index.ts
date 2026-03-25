@@ -205,31 +205,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Retornar como SSE (compatível com frontend existente)
-    const encoder = new TextEncoder();
-    const sseData: string[] = [];
-
-    // Enviar texto como tokens (simular streaming com chunks maiores)
-    if (fullText) {
-      // Dividir em chunks de ~50 chars para simular streaming
-      const chunkSize = 50;
-      for (let i = 0; i < fullText.length; i += chunkSize) {
-        const token = fullText.slice(i, i + chunkSize);
-        sseData.push(`data: ${JSON.stringify({ token })}\n\n`);
-      }
-    }
-
-    // Enviar done com tool_calls
-    sseData.push(`data: ${JSON.stringify({
-      done: true,
-      reply: fullText,
+    // Retornar JSON direto
+    return new Response(JSON.stringify({
+      reply: fullText || "Sem texto na resposta.",
       tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
-    })}\n\n`);
-
-    // Enviar como SSE stream simulado
-    const body2 = encoder.encode(sseData.join(""));
-    return new Response(body2, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("Edge function error:", e);

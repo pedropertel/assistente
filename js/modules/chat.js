@@ -198,62 +198,14 @@ export async function sendMsg() {
 
     const bubble = document.getElementById(bubbleId);
 
-    // Tentar streaming
-    if (response.body && typeof response.body.getReader === 'function') {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText = '';
-      let finalData = null;
+    // Resposta JSON direta
+    const data = await response.json();
+    const replyText = data.reply || 'Sem resposta';
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-
-        // Parse SSE lines
-        const lines = chunk.split('\n');
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const jsonStr = line.slice(6).trim();
-          if (!jsonStr) continue;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            if (parsed.done) {
-              finalData = parsed;
-            } else if (parsed.token) {
-              fullText += parsed.token;
-              if (bubble) bubble.innerHTML = renderMarkdown(fullText);
-              scrollToBottom();
-            }
-          } catch {}
-        }
-      }
-
-      // Se não recebeu streaming, tentar como JSON direto
-      if (!fullText && !finalData) {
-        try {
-          const text = decoder.decode();
-          finalData = JSON.parse(chunk + text);
-          fullText = finalData.reply || '';
-        } catch {}
-      }
-
-      // Usar texto limpo (sem tags ACTION/MEMORY) se disponível
-      const cleanReply = finalData?.reply || fullText || '';
-      if (bubble) bubble.innerHTML = renderMarkdown(cleanReply || 'Sem resposta');
-
-      // Processar action e memory_suggest
-      if (finalData) {
-        await processResponse(finalData, cleanReply, slug);
-      }
-    } else {
-      // Fallback: resposta completa de uma vez
-      const data = await response.json();
-      if (bubble) bubble.innerHTML = renderMarkdown(data.reply || 'Sem resposta');
-      await processResponse(data, data.reply, slug);
-    }
-
+    if (bubble) bubble.innerHTML = renderMarkdown(replyText);
     scrollToBottom();
+
+    await processResponse(data, replyText, slug);
   } catch (e) {
     console.error('Chat error:', e);
     const bubble = document.getElementById(bubbleId);
