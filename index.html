@@ -233,6 +233,7 @@ body {
 /* ── PAGES ── */
 .page { display: none; }
 .page.active { display: block; }
+#page-chat.active { display: flex; }
 
 /* ── BUTTONS ── */
 .btn {
@@ -639,6 +640,25 @@ tr:hover td { background: var(--bg-hover); }
   .kanban-card-move { display: flex !important; }
   .kanban-card-actions { display: none !important; }
   .kanban-card:hover .kanban-card-actions { display: none !important; }
+  /* Chat fix: full height without overflow */
+  #page-chat { height: calc(100dvh - var(--header-height) - var(--content-pad-sm) * 2); }
+}
+
+/* ── SMALL MOBILE (375px-480px) ── */
+@media (max-width: 480px) {
+  :root {
+    --content-pad-sm: 12px;
+  }
+  .stat-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card { padding: 12px; }
+  .stat-card-value { font-size: 22px; }
+  .stat-card-label { font-size: 11px; }
+  .card { padding: 12px; }
+  .chart-container { max-height: 250px; }
+  .header-title { font-size: 16px; }
+  .tabs .tab { padding: 8px 12px; font-size: 12px; }
+  .table-wrap { font-size: 12px; }
+  .table-wrap th, .table-wrap td { padding: 6px 8px; }
 }
 
 /* ── LARGE DESKTOP ── */
@@ -647,10 +667,19 @@ tr:hover td { background: var(--bg-hover); }
   #page-dashboard .card { min-height: 0; }
 }
 
+/* ── CHART CONTAINERS ── */
+.chart-container {
+  position: relative;
+  width: 100%;
+  max-height: 300px;
+  overflow: hidden;
+}
+
 /* ── CHAT ── */
-#page-chat { display: flex; flex-direction: column; height: 100%; }
-#chat-view { display: none; flex-direction: column; height: 100%; min-height: 0; }
+#page-chat { display: flex; flex-direction: column; height: calc(100dvh - var(--header-height) - var(--content-pad-sm) * 2); }
+#chat-view { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 #chat-view.active { display: flex; }
+#chat-messages { flex: 1; overflow-y: auto; min-height: 0; }
 .chat-msg { display: flex; gap: 10px; max-width: 85%; animation: fadeIn 0.2s ease; }
 .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
 .chat-msg.assistant { align-self: flex-start; }
@@ -723,7 +752,8 @@ tr:hover td { background: var(--bg-hover); }
 
 /* ── DASHBOARD CHARTS GRID ── */
 @media (min-width: 768px) {
-  #page-dashboard > div:nth-child(3) { grid-template-columns: 1fr 1fr; }
+  .charts-grid { grid-template-columns: 1fr 1fr; }
+  #page-chat { height: calc(100dvh - var(--header-height) - var(--content-pad) * 2); }
 }
   </style>
 </head>
@@ -850,18 +880,18 @@ tr:hover td { background: var(--bg-hover); }
         </div>
 
         <!-- Graficos -->
-        <div style="display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:20px;">
+        <div class="charts-grid" style="display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:20px;">
           <div class="card">
             <div class="card-header">
               <span class="card-title">Performance — 7 dias</span>
             </div>
-            <canvas id="dash-chart-line" height="200"></canvas>
+            <div class="chart-container"><canvas id="dash-chart-line" height="200"></canvas></div>
           </div>
           <div class="card">
             <div class="card-header">
               <span class="card-title">Tarefas por empresa</span>
             </div>
-            <canvas id="dash-chart-doughnut" height="200"></canvas>
+            <div class="chart-container"><canvas id="dash-chart-doughnut" height="200"></canvas></div>
           </div>
         </div>
 
@@ -908,7 +938,7 @@ tr:hover td { background: var(--bg-hover); }
         </div>
 
         <!-- Tela de chat -->
-        <div id="chat-view" style="display:none;height:100%;display:none;flex-direction:column;">
+        <div id="chat-view">
           <!-- Header do chat -->
           <div id="chat-header" style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:12px;">
             <button class="btn-icon" onclick="showAgentGrid()">&#x25C0;</button>
@@ -920,7 +950,7 @@ tr:hover td { background: var(--bg-hover); }
           </div>
 
           <!-- Mensagens -->
-          <div id="chat-messages" style="flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch;"></div>
+          <div id="chat-messages" style="padding:8px 0;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch;"></div>
 
           <!-- Memory suggest -->
           <div id="chat-memory-suggest" style="display:none;"></div>
@@ -1069,6 +1099,7 @@ tr:hover td { background: var(--bg-hover); }
       <div class="page" id="page-cedtec">
         <!-- Banner de alerta Meta -->
         <div id="cedtec-alert-banner"></div>
+        <div id="cedtec-last-sync" style="font-size:11px;color:var(--text-muted);text-align:right;margin-bottom:8px;"></div>
 
         <!-- Sub-abas -->
         <div class="tabs" style="margin-bottom:16px;">
@@ -1085,7 +1116,7 @@ tr:hover td { background: var(--bg-hover); }
           <div id="cedtec-saldo-alert"></div>
           <div class="card" style="margin-bottom:16px;">
             <div class="card-title" style="margin-bottom:12px;">Gasto vs Leads — 30 dias</div>
-            <canvas id="cedtec-chart-gastoLeads" height="200"></canvas>
+            <div class="chart-container"><canvas id="cedtec-chart-gastoLeads" height="200"></canvas></div>
           </div>
           <div class="card" style="margin-bottom:16px;">
             <div class="card-title" style="margin-bottom:12px;">Top campanhas</div>
@@ -1207,7 +1238,7 @@ tr:hover td { background: var(--bg-hover); }
 
         <!-- CRONOGRAMA -->
         <div id="sitio-tab-cronograma" style="display:none;">
-          <div class="card"><canvas id="sitio-chart-crono" height="300"></canvas></div>
+          <div class="card"><div class="chart-container"><canvas id="sitio-chart-crono" height="300"></canvas></div></div>
         </div>
 
         <!-- RELATORIOS -->
@@ -1215,7 +1246,7 @@ tr:hover td { background: var(--bg-hover); }
           <div style="display:grid;grid-template-columns:1fr;gap:16px;">
             <div class="card">
               <div class="card-title" style="margin-bottom:12px;">Por centro de custo</div>
-              <canvas id="sitio-chart-pizza" height="300"></canvas>
+              <div class="chart-container"><canvas id="sitio-chart-pizza" height="300"></canvas></div>
             </div>
             <div class="card" id="sitio-resumo-fin"></div>
           </div>

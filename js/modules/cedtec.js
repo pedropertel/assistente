@@ -13,6 +13,7 @@ let recargas = [];
 let conexao = null;
 let activeTab = 'visao';
 let gastoLeadsChart = null;
+let balanceInterval = null;
 
 export async function loadCedtec() {
   try {
@@ -31,6 +32,33 @@ export async function loadCedtec() {
   }
   checkAlerts();
   renderTab();
+
+  // Auto-fetch saldo ao abrir
+  fetchBalanceAuto();
+
+  // Polling a cada 5 minutos enquanto modulo aberto
+  if (balanceInterval) clearInterval(balanceInterval);
+  balanceInterval = setInterval(fetchBalanceAuto, 5 * 60 * 1000);
+}
+
+async function fetchBalanceAuto() {
+  if (!conexao || conexao.status === 'desconectado') return;
+  try {
+    const { data, error } = await supabase.functions.invoke('meta-balance');
+    if (error) { console.warn('Meta balance auto-fetch error:', error); return; }
+    if (data && !data.error) {
+      contaMeta = { ...contaMeta, saldo_atual: data.saldo_atual, gasto_hoje: data.gasto_hoje, gasto_mes: data.gasto_mes };
+      renderTab();
+      updateLastSync();
+    }
+  } catch (e) {
+    console.warn('Meta balance auto-fetch error:', e);
+  }
+}
+
+function updateLastSync() {
+  const el = document.getElementById('cedtec-last-sync');
+  if (el) el.textContent = `Atualizado: ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
 // ── TABS ──
