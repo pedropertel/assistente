@@ -11,6 +11,7 @@ let currentAgente = null; // null = chat geral
 let agentes = [];
 let recognition = null;
 let isRecording = false;
+let pendingFile = null; // {name, type, content} para enviar com a mensagem
 
 // ── LOAD ──
 
@@ -140,19 +141,52 @@ export async function sendMsg() {
   appendMsg('assistant', '<span class="chat-cursor"></span>', false, bubbleId);
   scrollToBottom();
 
+  // Incluir arquivo se anexado
+  let messageText = text;
+  if (pendingFile && !pendingFile.isImage) {
+    messageText = `${text}\n\n[Arquivo: ${pendingFile.name}]\n${pendingFile.content}`;
+  }
+
+  // Limpar attachment
+  const fileAttached = pendingFile;
+  removeAttachment();
+
   // Preparar request
   const entidades = store.get('entidades') || [];
   const body = {
-    message: text,
+    message: messageText,
     agente_slug: slug,
     entidades,
   };
+
+  // Incluir imagem se anexada
+  if (fileAttached?.isImage) {
+    body.image = fileAttached.content;
+  }
 
   if (currentAgente) {
     body.agente_persona = currentAgente.persona || '';
     body.agente_contexto = currentAgente.contexto || '';
     body.agente_memorias = currentAgente.memorias || '';
     body.agente_inteligencia = currentAgente.inteligencia || '';
+  }
+
+  // Buscar arquivos de inteligência do agente
+  if (slug) {
+    try {
+      const { data: intelFiles } = await supabase.from('agente_arquivos').select('nome, conteudo_texto').eq('agente_slug', slug);
+      if (intelFiles && intelFiles.length > 0) {
+        const filesContent = intelFiles
+          .filter(f => f.conteudo_texto)
+          .map(f => `[${f.nome}]\n${f.conteudo_texto}`)
+          .join('\n\n');
+        if (filesContent) {
+          body.agente_inteligencia = (body.agente_inteligencia || '') + '\n\n[ARQUIVOS DE REFERÊNCIA]\n' + filesContent;
+        }
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar arquivos de inteligencia:', e);
+    }
   }
 
   // Buscar últimas 10 mensagens como histórico
@@ -368,6 +402,50 @@ export async function saveMemoria(agenteSlug, texto) {
 export function dismissMemoria() {
   const container = document.getElementById('chat-memory-suggest');
   if (container) { container.style.display = 'none'; container.innerHTML = ''; }
+}
+
+// ── ARQUIVO ANEXADO ──
+
+export function attachFile() {
+  const input = document.getElementById('chat-file-input');
+  if (input) {
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      const preview = document.getElementById('chat-attachment');
+      const nameEl = document.getElementById('chat-attachment-name');
+
+      if (file.type.startsWith('image/')) {
+        // Imagem: converter para base64
+        const reader = new FileReader();
+        reader.onload = () => {
+          pendingFile = { name: file.name, type: file.type, content: reader.result, isImage: true };
+          if (nameEl) nameEl.textContent = `🖼️ ${file.name}`;
+          if (preview) preview.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // Texto/CSV/MD/JSON: ler como texto
+        try {
+          const text = await file.text();
+          pendingFile = { name: file.name, type: file.type, content: text, isImage: false };
+          if (nameEl) nameEl.textContent = `📄 ${file.name} (${(text.length / 1024).toFixed(1)} KB)`;
+          if (preview) preview.style.display = 'flex';
+        } catch {
+          toast.show('Nao foi possivel ler o arquivo', 'error');
+        }
+      }
+      input.value = '';
+    };
+    input.click();
+  }
+}
+
+export function removeAttachment() {
+  pendingFile = null;
+  const preview = document.getElementById('chat-attachment');
+  if (preview) preview.style.display = 'none';
 }
 
 // ── VOZ ──

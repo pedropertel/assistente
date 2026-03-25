@@ -989,12 +989,20 @@ tr:hover td { background: var(--bg-hover); }
           <!-- Memory suggest -->
           <div id="chat-memory-suggest" style="display:none;"></div>
 
+          <!-- Arquivo anexado preview -->
+          <div id="chat-attachment" style="display:none;padding:8px 12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);margin-bottom:8px;display:none;align-items:center;gap:8px;font-size:12px;">
+            <span id="chat-attachment-name"></span>
+            <button class="btn-icon" onclick="chatRemoveAttachment()" style="width:24px;height:24px;font-size:14px;">&#x2715;</button>
+          </div>
+
           <!-- Input -->
           <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border);align-items:flex-end;">
+            <button class="btn-icon" onclick="chatAttachFile()" title="Anexar arquivo" style="flex-shrink:0;">&#x1F4CE;</button>
             <button class="btn-icon" id="chat-mic-btn" onclick="toggleMic()" title="Voz" style="flex-shrink:0;">&#x1F3A4;</button>
             <textarea class="input" id="chat-input" rows="1" placeholder="Digite sua mensagem..." style="resize:none;min-height:44px;max-height:120px;" onkeydown="chatKeyDown(event)"></textarea>
             <button class="btn btn-primary btn-icon" onclick="sendMsg()" title="Enviar" style="flex-shrink:0;">&#x25B6;</button>
           </div>
+          <input type="file" id="chat-file-input" style="display:none;" accept=".pdf,.txt,.csv,.md,.json,.png,.jpg,.jpeg,.gif,.webp">
         </div>
       </div>
 

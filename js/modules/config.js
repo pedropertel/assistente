@@ -94,6 +94,7 @@ export function openNewAgente() {
 export function openEditAgente(id) {
   const a = agentes.find(x => x.id === id);
   if (!a) return;
+  editingAgenteId = id;
 
   modal.open('Editar agente', buildAgenteForm(), `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
@@ -112,6 +113,7 @@ export function openEditAgente(id) {
     if (el('ag-contexto')) el('ag-contexto').value = a.contexto || '';
     if (el('ag-memorias')) el('ag-memorias').value = a.memorias || '';
     if (el('ag-inteligencia')) el('ag-inteligencia').value = a.inteligencia || '';
+    loadIntelFiles(a.slug);
   }, 10);
 }
 
@@ -163,8 +165,15 @@ function buildAgenteForm() {
     </div>
 
     <div id="ag-tab-inteligencia" style="display:none;">
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Base de conhecimento especializado.</p>
-      <textarea class="textarea" id="ag-inteligencia" rows="12" placeholder="Benchmarks, historico, estrategia..."></textarea>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Base de conhecimento especializado. Texto + arquivos que o agente consulta em toda conversa.</p>
+      <textarea class="textarea" id="ag-inteligencia" rows="8" placeholder="Benchmarks, historico, estrategia..."></textarea>
+      <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">Arquivos de referencia</span>
+          <button class="btn btn-secondary btn-sm" onclick="configUploadIntelFile()">+ Arquivo</button>
+        </div>
+        <div id="ag-intel-files" style="font-size:13px;color:var(--text-muted);">Carregando...</div>
+      </div>
     </div>
   `;
 }
@@ -306,6 +315,105 @@ export async function deleteMemoria(id, idx) {
   } catch (e) {
     toast.show('Erro ao remover', 'error');
   }
+}
+
+// ── ARQUIVOS DE INTELIGÊNCIA ──
+
+let editingAgenteId = null;
+
+export async function loadIntelFiles(agenteSlug) {
+  const container = document.getElementById('ag-intel-files');
+  if (!container) return;
+  try {
+    const { data } = await supabase.from('agente_arquivos').select('*').eq('agente_slug', agenteSlug).order('created_at', { ascending: false });
+    if (!data || data.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted);font-size:12px;">Nenhum arquivo ainda</p>';
+      return;
+    }
+    container.innerHTML = data.map(f => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          <span>${fileTypeIcon(f.arquivo_tipo)}</span>
+          <div style="min-width:0;">
+            <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(f.nome)}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${f.conteudo_texto ? (f.conteudo_texto.length > 50 ? f.conteudo_texto.slice(0, 50) + '...' : f.conteudo_texto) : 'Arquivo binario'}</div>
+          </div>
+        </div>
+        <button class="btn-icon" style="color:var(--danger);flex-shrink:0;" onclick="configDeleteIntelFile('${f.id}')" title="Excluir">&#x1F5D1;</button>
+      </div>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = '<p style="color:var(--danger);font-size:12px;">Erro ao carregar</p>';
+  }
+}
+
+export async function uploadIntelFile() {
+  if (!editingAgenteId) return;
+  const a = agentes.find(x => x.id === editingAgenteId);
+  if (!a) return;
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.pdf,.txt,.csv,.md,.json,.xlsx,.xls,.doc,.docx';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    toast.show(`Enviando ${file.name}...`, 'info');
+
+    const path = `${a.slug}/intel/${Date.now()}_${file.name}`;
+    try {
+      const { error: upErr } = await supabase.storage.from('agentes').upload(path, file);
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from('agentes').getPublicUrl(path);
+
+      // Extrair texto se possivel
+      let conteudoTexto = null;
+      if (file.type === 'text/plain' || file.name.endsWith('.md') || file.name.endsWith('.csv') || file.name.endsWith('.json')) {
+        conteudoTexto = await file.text();
+      }
+
+      await supabase.from('agente_arquivos').insert({
+        agente_slug: a.slug,
+        nome: file.name,
+        arquivo_url: urlData?.publicUrl || path,
+        conteudo_texto: conteudoTexto,
+        arquivo_tipo: file.type || 'application/octet-stream',
+        arquivo_size: file.size,
+      });
+
+      toast.show('Arquivo adicionado a inteligencia', 'success');
+      await loadIntelFiles(a.slug);
+    } catch (e) {
+      console.error(e);
+      toast.show('Erro no upload', 'error');
+    }
+  };
+  input.click();
+}
+
+export async function deleteIntelFile(id) {
+  if (!confirm('Excluir este arquivo da inteligencia?')) return;
+  try {
+    const { data: f } = await supabase.from('agente_arquivos').select('arquivo_url').eq('id', id).single();
+    if (f?.arquivo_url) {
+      const path = f.arquivo_url.split('/storage/v1/object/public/agentes/')[1];
+      if (path) await supabase.storage.from('agentes').remove([path]);
+    }
+    await supabase.from('agente_arquivos').delete().eq('id', id);
+    toast.show('Arquivo removido', 'success');
+    const a = agentes.find(x => x.id === editingAgenteId);
+    if (a) await loadIntelFiles(a.slug);
+  } catch (e) {
+    toast.show('Erro ao excluir', 'error');
+  }
+}
+
+function fileTypeIcon(mime) {
+  if (!mime) return '&#x1F4C4;';
+  if (mime.includes('pdf')) return '&#x1F4D1;';
+  if (mime.includes('text') || mime.includes('csv') || mime.includes('json')) return '&#x1F4DD;';
+  if (mime.includes('spreadsheet') || mime.includes('excel')) return '&#x1F4CA;';
+  return '&#x1F4C4;';
 }
 
 // ── INTEGRAÇÕES ──

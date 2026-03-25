@@ -235,6 +235,8 @@ window.saveMemoria = (slug, texto) => chat.saveMemoria(slug, texto);
 window.showAgentGrid = () => chat.showAgentGrid();
 window.dismissMemoria = () => chat.dismissMemoria();
 window.chatKeyDown = (e) => chat.keyDown(e);
+window.chatAttachFile = () => chat.attachFile();
+window.chatRemoveAttachment = () => chat.removeAttachment();
 
 // SÍTIO
 window.sitioTab = (t) => sitio.tab(t);
@@ -269,5 +271,7 @@ window.deleteMemoriaAgente = (id, idx) => config.deleteMemoria(id, idx);
 window.configSaveAgente = (id) => config.saveAgente(id);
 window.configAgTab = (t) => config.agTab(t);
 window.configAutoSlug = () => config.autoSlug();
+window.configUploadIntelFile = () => config.uploadIntelFile();
+window.configDeleteIntelFile = (id) => config.deleteIntelFile(id);
 window.configTestMeta = () => config.testMeta();
 window.configSaveMeta = () => config.saveMeta();

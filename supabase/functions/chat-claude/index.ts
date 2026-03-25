@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const {
       message,
+      image,
       agente_slug,
       agente_persona,
       agente_contexto,
@@ -76,7 +77,24 @@ Deno.serve(async (req) => {
         }
       }
     }
-    messages.push({ role: "user", content: message });
+    // Mensagem do usuário (com imagem se houver)
+    if (image && typeof image === "string" && image.startsWith("data:image/")) {
+      // Extrair base64 e media type
+      const match = image.match(/^data:(image\/\w+);base64,(.+)$/);
+      if (match) {
+        messages.push({
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: match[1], data: match[2] } },
+            { type: "text", text: message },
+          ],
+        });
+      } else {
+        messages.push({ role: "user", content: message });
+      }
+    } else {
+      messages.push({ role: "user", content: message });
+    }
 
     // Chamar Anthropic API com streaming
     const anthropicResp = await fetch(ANTHROPIC_API_URL, {
