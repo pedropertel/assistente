@@ -127,6 +127,7 @@ body {
   display: none;
   height: 100dvh;
   overflow: hidden;
+  flex-direction: row;
 }
 
 /* ── SIDEBAR ── */
@@ -210,6 +211,9 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 /* ── HEADER ── */
@@ -241,13 +245,10 @@ body {
   padding: var(--content-pad-sm);
   -webkit-overflow-scrolling: touch;
 }
-.content > .page.active {
-  max-width: var(--content-max);
-  margin: 0 auto;
-}
+/* Content fills available space */
 
 /* ── PAGES ── */
-.page { display: none; }
+.page { display: none; width: 100%; }
 .page.active { display: block; }
 
 /* ── BUTTONS ── */
@@ -646,7 +647,7 @@ tr:hover td { background: var(--bg-hover); }
 @media (min-width: 768px) {
   .sidebar { transform: translateX(0); }
   .sidebar-overlay { display: none !important; }
-  .main { margin-left: var(--sidebar-width); }
+  .main { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
   .header-menu-btn { display: none; }
   .header { padding: 0 var(--content-pad); }
   .content { padding: var(--content-pad); }
@@ -654,6 +655,9 @@ tr:hover td { background: var(--bg-hover); }
   .modal-box { width: 560px; }
   .toast-container { top: 24px; right: 24px; }
   .card { padding: 24px; }
+  .agenda-layout { flex-direction: row; }
+  .agenda-sidebar { width: 300px; flex-shrink: 0; }
+  .agenda-events { flex: 1; min-width: 0; }
 }
 
 /* ── MOBILE KANBAN ── */
@@ -775,11 +779,7 @@ tr:hover td { background: var(--bg-hover); }
 .agenda-event-actions { display: none; gap: 4px; }
 .agenda-event-card:hover .agenda-event-actions { display: flex; }
 
-@media (min-width: 768px) {
-  .agenda-layout { flex-direction: row; }
-  .agenda-sidebar { width: 280px; flex-shrink: 0; }
-  .agenda-events { flex: 1; min-width: 0; }
-}
+/* Agenda desktop layout merged into main 768px query */
 
 /* ── DASHBOARD CHARTS GRID ── */
 @media (min-width: 768px) {
@@ -1110,7 +1110,7 @@ tr:hover td { background: var(--bg-hover); }
         </div>
 
         <!-- Grid de pastas e arquivos -->
-        <div id="docs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;"></div>
+        <div id="docs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;"></div>
 
         <!-- Empty state -->
         <div id="docs-empty" class="empty-state" style="display:none;">
@@ -1267,7 +1267,7 @@ tr:hover td { background: var(--bg-hover); }
           <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
             <button class="btn btn-primary btn-sm" onclick="openNewCentro()">+ Novo centro</button>
           </div>
-          <div id="sitio-centros-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;"></div>
+          <div id="sitio-centros-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;"></div>
         </div>
 
         <!-- CRONOGRAMA -->
@@ -1302,7 +1302,7 @@ tr:hover td { background: var(--bg-hover); }
           <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
             <button class="btn btn-primary btn-sm" onclick="openNewAgente()">+ Novo agente</button>
           </div>
-          <div id="config-agentes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;"></div>
+          <div id="config-agentes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;"></div>
           <div id="config-agentes-empty" class="empty-state" style="display:none;">
             <div class="empty-state-icon">&#x1F916;</div>
             <p class="empty-state-text">Nenhum agente</p>
