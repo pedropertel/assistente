@@ -8,6 +8,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-4-5-20250514";
+// Fallback: se Sonnet falhar, tentar Haiku
+const FALLBACK_MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 8192;
 
 const corsHeaders = {
@@ -197,21 +199,37 @@ Deno.serve(async (req) => {
     const toolCalls: Array<{ name: string; input: any }> = [];
     let currentToolName = "";
     let currentToolJson = "";
+    let inToolBlock = false;
     let doneSent = false;
 
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
+        const sendDone = () => {
+          if (doneSent) return;
+          doneSent = true;
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            done: true,
+            reply: fullText,
+            tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+          })}\n\n`));
+        };
+
         try {
+          let buffer = "";
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
+            buffer += decoder.decode(value, { stream: true });
 
-            for (const line of chunk.split("\n")) {
+            // Processar linhas completas
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || ""; // manter linha incompleta no buffer
+
+            for (const line of lines) {
               if (!line.startsWith("data: ")) continue;
               const data = line.slice(6).trim();
-              if (data === "[DONE]") continue;
+              if (!data || data === "[DONE]") continue;
 
               try {
                 const ev = JSON.parse(data);
@@ -223,52 +241,58 @@ Deno.serve(async (req) => {
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`));
                 }
 
-                // Tool use — início do bloco
+                // Tool use — início
                 if (ev.type === "content_block_start" && ev.content_block?.type === "tool_use") {
                   currentToolName = ev.content_block.name;
                   currentToolJson = "";
+                  inToolBlock = true;
                 }
 
-                // Tool use — acumular JSON input
+                // Tool use — acumular JSON
                 if (ev.type === "content_block_delta" && ev.delta?.type === "input_json_delta") {
                   currentToolJson += ev.delta.partial_json;
                 }
 
-                // Tool use — fim do bloco
-                if (ev.type === "content_block_stop" && currentToolName) {
+                // Fim de qualquer content block
+                if (ev.type === "content_block_stop" && inToolBlock) {
                   try {
-                    const input = JSON.parse(currentToolJson);
+                    const input = currentToolJson ? JSON.parse(currentToolJson) : {};
                     toolCalls.push({ name: currentToolName, input });
                   } catch (e) {
-                    console.error("Tool JSON parse error:", e, currentToolJson);
+                    console.error("Tool JSON parse error:", e, "raw:", currentToolJson);
                   }
                   currentToolName = "";
                   currentToolJson = "";
+                  inToolBlock = false;
                 }
 
-                // Mensagem completa
-                if (ev.type === "message_stop" && !doneSent) {
-                  doneSent = true;
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-                    done: true,
-                    reply: fullText,
-                    tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
-                  })}\n\n`));
+                // message_delta com stop_reason
+                if (ev.type === "message_delta") {
+                  sendDone();
+                }
+
+                // message_stop
+                if (ev.type === "message_stop") {
+                  sendDone();
                 }
               } catch {}
             }
           }
 
-          // Fallback se message_stop não veio
-          if (!doneSent) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-              done: true,
-              reply: fullText,
-              tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
-            })}\n\n`));
+          // Processar buffer restante
+          if (buffer.startsWith("data: ")) {
+            try {
+              const ev = JSON.parse(buffer.slice(6).trim());
+              if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") {
+                fullText += ev.delta.text;
+              }
+            } catch {}
           }
+
+          sendDone();
         } catch (e) {
           console.error("Stream error:", e);
+          sendDone();
         }
         controller.close();
       },
