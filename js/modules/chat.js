@@ -11,7 +11,7 @@ let currentAgente = null; // null = chat geral
 let agentes = [];
 let recognition = null;
 let isRecording = false;
-let pendingFile = null; // {name, type, content} para enviar com a mensagem
+let pendingFiles = []; // [{name, type, content, isImage}]
 
 // ── LOAD ──
 
@@ -141,14 +141,18 @@ export async function sendMsg() {
   appendMsg('assistant', '<span class="chat-cursor"></span>', false, bubbleId);
   scrollToBottom();
 
-  // Incluir arquivo se anexado
+  // Incluir arquivos de texto na mensagem
   let messageText = text;
-  if (pendingFile && !pendingFile.isImage) {
-    messageText = `${text}\n\n[Arquivo: ${pendingFile.name}]\n${pendingFile.content}`;
+  const textFiles = pendingFiles.filter(f => !f.isImage);
+  if (textFiles.length > 0) {
+    const filesBlock = textFiles.map(f => `[Arquivo: ${f.name}]\n${f.content}`).join('\n\n');
+    messageText = `${text}\n\n${filesBlock}`;
   }
 
-  // Limpar attachment
-  const fileAttached = pendingFile;
+  // Guardar imagens para enviar separado
+  const imageFiles = pendingFiles.filter(f => f.isImage);
+
+  // Limpar attachments
   removeAttachment();
 
   // Preparar request
@@ -159,9 +163,11 @@ export async function sendMsg() {
     entidades,
   };
 
-  // Incluir imagem se anexada
-  if (fileAttached?.isImage) {
-    body.image = fileAttached.content;
+  // Incluir imagens se anexadas
+  if (imageFiles.length === 1) {
+    body.image = imageFiles[0].content;
+  } else if (imageFiles.length > 1) {
+    body.images = imageFiles.map(f => f.content);
   }
 
   if (currentAgente) {
@@ -410,47 +416,67 @@ export function attachFile() {
   const input = document.getElementById('chat-file-input');
   if (input) {
     input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file) return;
+      const fileList = input.files;
+      if (!fileList || fileList.length === 0) return;
 
-      const preview = document.getElementById('chat-attachment');
-      const nameEl = document.getElementById('chat-attachment-name');
-
-      if (file.type.startsWith('image/')) {
-        // Imagem: converter para base64
-        const reader = new FileReader();
-        reader.onload = () => {
-          pendingFile = { name: file.name, type: file.type, content: reader.result, isImage: true };
-          if (nameEl) nameEl.textContent = `🖼️ ${file.name}`;
-          if (preview) preview.style.display = 'flex';
-        };
-        reader.readAsDataURL(file);
-      } else if (isExcelFile(file.name)) {
-        // Excel: converter para texto com SheetJS
-        try {
-          const text = await readExcelAsText(file);
-          pendingFile = { name: file.name, type: file.type, content: text, isImage: false };
-          const rows = text.split('\n').length;
-          if (nameEl) nameEl.textContent = `📊 ${file.name} (${rows} linhas)`;
-          if (preview) preview.style.display = 'flex';
-        } catch (e) {
-          toast.show('Erro ao ler planilha', 'error');
-        }
-      } else {
-        // Texto/CSV/MD/JSON: ler como texto
-        try {
-          const text = await file.text();
-          pendingFile = { name: file.name, type: file.type, content: text, isImage: false };
-          if (nameEl) nameEl.textContent = `📄 ${file.name} (${(text.length / 1024).toFixed(1)} KB)`;
-          if (preview) preview.style.display = 'flex';
-        } catch {
-          toast.show('Nao foi possivel ler o arquivo', 'error');
-        }
+      for (const file of fileList) {
+        await processAttachment(file);
       }
+      updateAttachmentPreview();
       input.value = '';
     };
     input.click();
   }
+}
+
+async function processAttachment(file) {
+  if (file.type.startsWith('image/')) {
+    const dataUrl = await readFileAsDataUrl(file);
+    pendingFiles.push({ name: file.name, type: file.type, content: dataUrl, isImage: true });
+  } else if (isExcelFile(file.name)) {
+    try {
+      const text = await readExcelAsText(file);
+      pendingFiles.push({ name: file.name, type: file.type, content: text, isImage: false });
+    } catch (e) {
+      toast.show(`Erro ao ler ${file.name}`, 'error');
+    }
+  } else {
+    try {
+      const text = await file.text();
+      pendingFiles.push({ name: file.name, type: file.type, content: text, isImage: false });
+    } catch {
+      toast.show(`Erro ao ler ${file.name}`, 'error');
+    }
+  }
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function updateAttachmentPreview() {
+  const preview = document.getElementById('chat-attachment');
+  const nameEl = document.getElementById('chat-attachment-name');
+  if (!preview || !nameEl) return;
+
+  if (pendingFiles.length === 0) {
+    preview.style.display = 'none';
+    return;
+  }
+
+  const labels = pendingFiles.map(f => {
+    if (f.isImage) return `🖼️ ${f.name}`;
+    if (isExcelFile(f.name)) return `📊 ${f.name}`;
+    return `📄 ${f.name}`;
+  });
+
+  nameEl.textContent = labels.join(', ');
+  preview.style.display = 'flex';
 }
 
 function isExcelFile(name) {
@@ -477,7 +503,7 @@ async function readExcelAsText(file) {
 }
 
 export function removeAttachment() {
-  pendingFile = null;
+  pendingFiles = [];
   const preview = document.getElementById('chat-attachment');
   if (preview) preview.style.display = 'none';
 }

@@ -32,6 +32,7 @@ Deno.serve(async (req) => {
     const {
       message,
       image,
+      images,
       agente_slug,
       agente_persona,
       agente_contexto,
@@ -77,21 +78,24 @@ Deno.serve(async (req) => {
         }
       }
     }
-    // Mensagem do usuário (com imagem se houver)
-    if (image && typeof image === "string" && image.startsWith("data:image/")) {
-      // Extrair base64 e media type
-      const match = image.match(/^data:(image\/\w+);base64,(.+)$/);
-      if (match) {
-        messages.push({
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: match[1], data: match[2] } },
-            { type: "text", text: message },
-          ],
-        });
-      } else {
-        messages.push({ role: "user", content: message });
+    // Mensagem do usuário (com imagens se houver)
+    const allImages = images || (image ? [image] : []);
+    const imageBlocks: any[] = [];
+
+    for (const img of allImages) {
+      if (typeof img === "string" && img.startsWith("data:image/")) {
+        const match = img.match(/^data:(image\/\w+);base64,(.+)$/);
+        if (match) {
+          imageBlocks.push({ type: "image", source: { type: "base64", media_type: match[1], data: match[2] } });
+        }
       }
+    }
+
+    if (imageBlocks.length > 0) {
+      messages.push({
+        role: "user",
+        content: [...imageBlocks, { type: "text", text: message }],
+      });
     } else {
       messages.push({ role: "user", content: message });
     }
