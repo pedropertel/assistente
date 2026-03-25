@@ -7,9 +7,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-sonnet-4-5-20250514";
-// Fallback: se Sonnet falhar, tentar Haiku
-const FALLBACK_MODEL = "claude-haiku-4-5-20251001";
+const MODEL = "claude-sonnet-4-5-20241022";
 const MAX_TOKENS = 8192;
 
 const corsHeaders = {
