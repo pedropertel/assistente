@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
       messages.push({ role: "user", content: message });
     }
 
-    // Chamar Anthropic API com streaming + tools
+    // Chamar Anthropic API SEM streaming primeiro (mais confiável com tool_use)
     const anthropicResp = await fetch(ANTHROPIC_API_URL, {
       method: "POST",
       headers: {
@@ -179,7 +179,6 @@ Deno.serve(async (req) => {
         system: systemPrompt,
         messages,
         tools: TOOLS,
-        stream: true,
       }),
     });
 
@@ -191,114 +190,45 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Stream SSE com suporte a tool_use
-    const reader = anthropicResp.body!.getReader();
-    const decoder = new TextDecoder();
+    // Processar resposta completa (não streaming)
+    const result = await anthropicResp.json();
+    console.log("Anthropic response stop_reason:", result.stop_reason, "content blocks:", result.content?.length);
 
     let fullText = "";
     const toolCalls: Array<{ name: string; input: any }> = [];
-    let currentToolName = "";
-    let currentToolJson = "";
-    let inToolBlock = false;
-    let doneSent = false;
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        const encoder = new TextEncoder();
-        const sendDone = () => {
-          if (doneSent) return;
-          doneSent = true;
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            done: true,
-            reply: fullText,
-            tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
-          })}\n\n`));
-        };
+    for (const block of result.content || []) {
+      if (block.type === "text") {
+        fullText += block.text;
+      } else if (block.type === "tool_use") {
+        toolCalls.push({ name: block.name, input: block.input });
+      }
+    }
 
-        try {
-          let buffer = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
+    // Retornar como SSE (compatível com frontend existente)
+    const encoder = new TextEncoder();
+    const sseData: string[] = [];
 
-            // Processar linhas completas
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || ""; // manter linha incompleta no buffer
+    // Enviar texto como tokens (simular streaming com chunks maiores)
+    if (fullText) {
+      // Dividir em chunks de ~50 chars para simular streaming
+      const chunkSize = 50;
+      for (let i = 0; i < fullText.length; i += chunkSize) {
+        const token = fullText.slice(i, i + chunkSize);
+        sseData.push(`data: ${JSON.stringify({ token })}\n\n`);
+      }
+    }
 
-            for (const line of lines) {
-              if (!line.startsWith("data: ")) continue;
-              const data = line.slice(6).trim();
-              if (!data || data === "[DONE]") continue;
+    // Enviar done com tool_calls
+    sseData.push(`data: ${JSON.stringify({
+      done: true,
+      reply: fullText,
+      tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+    })}\n\n`);
 
-              try {
-                const ev = JSON.parse(data);
-
-                // Texto normal — stream token por token
-                if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") {
-                  const token = ev.delta.text;
-                  fullText += token;
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`));
-                }
-
-                // Tool use — início
-                if (ev.type === "content_block_start" && ev.content_block?.type === "tool_use") {
-                  currentToolName = ev.content_block.name;
-                  currentToolJson = "";
-                  inToolBlock = true;
-                }
-
-                // Tool use — acumular JSON
-                if (ev.type === "content_block_delta" && ev.delta?.type === "input_json_delta") {
-                  currentToolJson += ev.delta.partial_json;
-                }
-
-                // Fim de qualquer content block
-                if (ev.type === "content_block_stop" && inToolBlock) {
-                  try {
-                    const input = currentToolJson ? JSON.parse(currentToolJson) : {};
-                    toolCalls.push({ name: currentToolName, input });
-                  } catch (e) {
-                    console.error("Tool JSON parse error:", e, "raw:", currentToolJson);
-                  }
-                  currentToolName = "";
-                  currentToolJson = "";
-                  inToolBlock = false;
-                }
-
-                // message_delta com stop_reason
-                if (ev.type === "message_delta") {
-                  sendDone();
-                }
-
-                // message_stop
-                if (ev.type === "message_stop") {
-                  sendDone();
-                }
-              } catch {}
-            }
-          }
-
-          // Processar buffer restante
-          if (buffer.startsWith("data: ")) {
-            try {
-              const ev = JSON.parse(buffer.slice(6).trim());
-              if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") {
-                fullText += ev.delta.text;
-              }
-            } catch {}
-          }
-
-          sendDone();
-        } catch (e) {
-          console.error("Stream error:", e);
-          sendDone();
-        }
-        controller.close();
-      },
-    });
-
-    return new Response(stream, {
+    // Enviar como SSE stream simulado
+    const body2 = encoder.encode(sseData.join(""));
+    return new Response(body2, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
     });
   } catch (e) {
