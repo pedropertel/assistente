@@ -3,8 +3,6 @@
 // ══════════════════════════════════════════
 
 import { supabase } from '../core/supabase.js';
-import * as store from '../core/store.js';
-import * as modal from '../core/modal.js';
 import * as toast from '../core/toast.js';
 
 let currentAgente = null; // null = chat geral
@@ -155,12 +153,10 @@ export async function sendMsg() {
   // Limpar attachments
   removeAttachment();
 
-  // Preparar request
-  const entidades = store.get('entidades') || [];
+  // Preparar request — body mínimo, Edge Function carrega tudo server-side
   const body = {
     message: messageText,
     agente_slug: slug,
-    entidades,
   };
 
   // Incluir imagens se anexadas
@@ -168,42 +164,6 @@ export async function sendMsg() {
     body.image = imageFiles[0].content;
   } else if (imageFiles.length > 1) {
     body.images = imageFiles.map(f => f.content);
-  }
-
-  if (currentAgente) {
-    body.agente_persona = currentAgente.persona || '';
-    body.agente_contexto = currentAgente.contexto || '';
-    body.agente_memorias = currentAgente.memorias || '';
-    body.agente_inteligencia = currentAgente.inteligencia || '';
-  }
-
-  // Buscar arquivos de inteligência do agente
-  if (slug) {
-    try {
-      const { data: intelFiles } = await supabase.from('agente_arquivos').select('nome, conteudo_texto').eq('agente_slug', slug);
-      if (intelFiles && intelFiles.length > 0) {
-        const filesContent = intelFiles
-          .filter(f => f.conteudo_texto)
-          .map(f => `[${f.nome}]\n${f.conteudo_texto}`)
-          .join('\n\n');
-        if (filesContent) {
-          body.agente_inteligencia = (body.agente_inteligencia || '') + '\n\n[ARQUIVOS DE REFERÊNCIA]\n' + filesContent;
-        }
-      }
-    } catch (e) {
-      console.warn('Erro ao carregar arquivos de inteligencia:', e);
-    }
-  }
-
-  // Buscar últimas 10 mensagens como histórico
-  try {
-    let hq = supabase.from('chat_mensagens').select('role, conteudo').order('created_at', { ascending: false }).limit(10);
-    if (slug) hq = hq.eq('agente_slug', slug);
-    else hq = hq.is('agente_slug', null);
-    const { data: hist } = await hq;
-    body.historico = (hist || []).reverse();
-  } catch (e) {
-    body.historico = [];
   }
 
   // Chamar Edge Function
