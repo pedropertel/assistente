@@ -233,7 +233,6 @@ body {
 /* ── PAGES ── */
 .page { display: none; }
 .page.active { display: block; }
-#page-chat.active { display: flex; }
 
 /* ── BUTTONS ── */
 .btn {
@@ -641,7 +640,7 @@ tr:hover td { background: var(--bg-hover); }
   .kanban-card-actions { display: none !important; }
   .kanban-card:hover .kanban-card-actions { display: none !important; }
   /* Chat fix: full height without overflow */
-  #page-chat { height: calc(100dvh - var(--header-height) - var(--content-pad-sm) * 2); }
+  #page-chat.active { height: calc(100dvh - var(--header-height) - var(--content-pad-sm) * 2); }
 }
 
 /* ── SMALL MOBILE (375px-480px) ── */
@@ -676,7 +675,7 @@ tr:hover td { background: var(--bg-hover); }
 }
 
 /* ── CHAT ── */
-#page-chat { display: flex; flex-direction: column; height: calc(100dvh - var(--header-height) - var(--content-pad-sm) * 2); }
+#page-chat.active { display: flex; flex-direction: column; height: calc(100dvh - var(--header-height) - var(--content-pad-sm) * 2); }
 #chat-view { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 #chat-view.active { display: flex; }
 #chat-messages { flex: 1; overflow-y: auto; min-height: 0; }
@@ -753,7 +752,7 @@ tr:hover td { background: var(--bg-hover); }
 /* ── DASHBOARD CHARTS GRID ── */
 @media (min-width: 768px) {
   .charts-grid { grid-template-columns: 1fr 1fr; }
-  #page-chat { height: calc(100dvh - var(--header-height) - var(--content-pad) * 2); }
+  #page-chat.active { height: calc(100dvh - var(--header-height) - var(--content-pad) * 2); }
 }
   </style>
 </head>
